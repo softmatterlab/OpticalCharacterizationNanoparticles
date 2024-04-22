@@ -1,0 +1,10 @@
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+
+# Other files #
+.vscode
+
+# cache files
+*.pyc
