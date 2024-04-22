@@ -733,7 +733,8 @@ class MieScatterer(Scatterer):
                 output_polarization = output_polarization.magnitude
 
             S1_coef *= np.sin(phi_field + output_polarization)
-            S2_coef *= np.cos(phi_field + output_polarization)
+            S2_coef *= np.cos(phi_field + output_polarization)*cos_theta_field 
+
 
         # Wave vector
         k = 2 * np.pi / wavelength * refractive_index_medium
