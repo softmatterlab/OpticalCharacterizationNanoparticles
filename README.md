@@ -11,6 +11,9 @@ In this tutorial, we provide three notebooks focusing on particle characterizati
 
 More...
 
+## Dependencies
+To run notebook please install deeplay (https://github.com/DeepTrackAI/deeplay) and its following dependencies.
+
 ## Usage
 ### Training-tutorials
 

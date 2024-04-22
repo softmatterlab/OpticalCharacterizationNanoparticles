@@ -748,7 +748,7 @@ class MieScatterer(Scatterer):
         # Scattering terms
         S1 = sum([E[i] * A[i] * PI[i] + E[i] * B[i] * TAU[i] for i in range(0, L)])
         S2 = sum([E[i] * B[i] * PI[i] + E[i] * A[i] * TAU[i] for i in range(0, L)])
-
+        
         arr[pupil_mask] = (
             -1j
             / (k * R3_field)
@@ -796,6 +796,7 @@ class MieScatterer(Scatterer):
             ),
         )
         fourier_field = fourier_field * propagation_matrix * np.exp(-1j * k * offset_z)
+
         if return_fft:
             return fourier_field[..., np.newaxis]
         else:
