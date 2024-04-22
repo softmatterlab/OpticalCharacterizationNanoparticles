@@ -7,7 +7,7 @@ By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Daniel Midtvedt,
 ## Description
  Here, we explore the relationship between particle properties and function through fast and detailed particle characterization techniques, focusing on nano-submicron particles.
 
-In this tutorial, we provide three notebooks focusing on particle characterization techniques: brightfield microscopy, darkfield microscopy, and ISCATY (Interferometric Scattering Microscopy).
+In this tutorial, we provide three notebooks focusing on particle characterization techniques: brightfield microscopy, darkfield microscopy, and ISCAT (Interferometric Scattering Microscopy).
 
 More...
 
