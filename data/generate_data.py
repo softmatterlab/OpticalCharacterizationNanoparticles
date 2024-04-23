@@ -11,16 +11,41 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "iscat"
+OPTICS_CASE = "brightfield"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (25e-9, 200e-9)
-REFRACTIVE_INDEX = (1.35, 1.6)
+REFRACTIVE_INDEX = (1.37, 1.6)
 N_PARTICLES = 50
 Z_RANGE = (-10, 10)
 
 # Define the parameters of the noise - Need to be tuned
-NOISE = 1e-5
+NOISE = True
+NOISE_DARKFIELD = 5e-5
+NOISE_ISCAT = 1e-3
+NOISE_BRIGHTFIELD_REAL = 5e-2
+NOISE_BRIGHTFIELD_IMAG = 7e-2
+
+# Define the pupil function for noise in holography and ISCAT
+def crop(pupil_radius):
+    def inner(image):
+        x = np.arange(image.shape[0]) - image.shape[0] / 2
+        y = np.arange(image.shape[1]) - image.shape[1] / 2
+        X, Y = np.meshgrid(x, y)
+        image[X ** 2 + Y ** 2 > pupil_radius ** 2] = 0
+        return image
+    return inner
+
+CROP = dt.Lambda(crop, pupil_radius=lambda: 0.8*IMAGE_SIZE)
+HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1=0 + np.random.randn() * 0.5)
+VC = dt.VerticalComa(coefficient=lambda c2:c2, c2=0 + np.random.randn() * 0.5)
+
+def get_label(image):
+    px = np.array(image.get_property("position")) - IMAGE_SIZE / 2
+    z = image.get_property("z")
+    r = image.get_property("radius")
+    n = image.get_property("refractive_index") - 1.33
+    return np.array([px[0], px[1], z, r, n])
 
 def main():
 
@@ -31,8 +56,10 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            return_field=True
+            return_field=True,
+            pupil= HC >> VC >> CROP
         )
+
     elif OPTICS_CASE == "darkfield":
         optics = dt.Darkfield(
             NA=NA,
@@ -42,6 +69,7 @@ def main():
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
             illumination_angle = np.pi
         )
+
     elif OPTICS_CASE == "iscat":
         optics = dt.ISCAT(
             NA=NA,
@@ -49,7 +77,8 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region = (0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            illumination_angle = np.pi
+            illumination_angle = np.pi,
+            pupil= HC >> VC >> CROP
         )
 
     #Define the particles
@@ -59,14 +88,29 @@ def main():
         position = lambda: np.random.uniform(6, IMAGE_SIZE-6, 2),
         z=lambda: np.random.uniform(*Z_RANGE),
         L=100,
-        ) ^ N_PARTICLES
+        )
     
     #Define the optics and particles.
-    training_data = optics(particles) 
+    training_data = optics(particles^N_PARTICLES) 
 
-    #Gaussian noise
-    if NOISE > 0:
-        training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE)
+    #Gaussian and poisson noise
+    if NOISE == True:
+        if OPTICS_CASE == "darkfield":
+            training_data = training_data >> dt.Poisson(snr=lambda: 7 + np.random.rand() * 10, background=0) >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_DARKFIELD)
+        elif OPTICS_CASE == "iscat":
+            training_data = training_data >> dt.Poisson(snr=lambda: 7 + np.random.rand() * 10, background=1) >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_ISCAT)
+        elif OPTICS_CASE == "brightfield":
+
+            real_noise = dt.Gaussian(
+                mu=0, 
+                sigma=lambda: np.random.rand() * NOISE_BRIGHTFIELD_REAL,
+            )
+            noise = real_noise >> dt.Gaussian(
+                mu=0, 
+                sigma=lambda real_sigma: real_sigma * NOISE_BRIGHTFIELD_IMAG* 1j,
+                real_sigma=real_noise.sigma
+            )
+            training_data = training_data >> noise
     
     if OPTICS_CASE == "brightfield":
         training_data = (training_data >> dt.Real()) & (training_data >> dt.Imag())
@@ -74,10 +118,17 @@ def main():
 
     #Generate the data
     frame = training_data.update().resolve()
+
+    #TODO - get labels
+
+    #Transform the data into a numpy array
     frame = np.array(frame, dtype = np.float32)
 
     #Save the data
-    np.save(f"..data/{OPTICS_CASE}_data.npy", frame)
+    np.save(f"../data/{OPTICS_CASE}_data.npy", frame)
+    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,0])
+
+    #TODO - save labels
 
 if __name__ == "__main__":
     main()
