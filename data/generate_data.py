@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (25e-9, 200e-9)
@@ -24,7 +24,7 @@ NOISE = True
 NOISE_DARKFIELD = 5e-5
 NOISE_ISCAT = 8e-4
 NOISE_BRIGHTFIELD_REAL = 5e-2
-NOISE_BRIGHTFIELD_IMAG = 8e-2
+NOISE_BRIGHTFIELD_IMAG = 1e-1
 
 # Set the seed for reproducibility
 np.random.seed(1234)
@@ -120,10 +120,6 @@ def main():
             )
             training_data = training_data >> noise
     
-    if OPTICS_CASE == "brightfield":
-        training_data = (training_data >> dt.Real()) & (training_data >> dt.Imag())
-        training_data = training_data >> dt.Merge(lambda: lambda x: np.concatenate( [np.array(_x) for _x in x], axis=-1 ))
-
     #To get the labels
     training_data.store_properties()
 
@@ -131,12 +127,19 @@ def main():
     frame = training_data.update().resolve()
 
     #Get the labels
-    labels = get_labels(training_data)
+    labels = get_labels(frame)
+
+    if OPTICS_CASE == "brightfield":
+        new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype = np.float32)
+        new_frame[...,0] = np.squeeze(np.real(frame))
+        new_frame[...,1] = np.squeeze(np.imag(frame))
+        frame = new_frame
 
     #Transform the data into a numpy array
     frame = np.array(frame, dtype = np.float32)
 
     #Save the data
+    print("Saving data...")
     np.save(f"../data/{OPTICS_CASE}_data.npy", frame)
     np.save(f"../data/{OPTICS_CASE}_labels.npy", labels)
     plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,-1], cmap = "gray")
