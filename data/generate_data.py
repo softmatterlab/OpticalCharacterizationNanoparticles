@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (25e-9, 200e-9)
@@ -22,9 +22,12 @@ Z_RANGE = (-10, 10)
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
 NOISE_DARKFIELD = 5e-5
-NOISE_ISCAT = 1e-3
+NOISE_ISCAT = 8e-4
 NOISE_BRIGHTFIELD_REAL = 5e-2
-NOISE_BRIGHTFIELD_IMAG = 7e-2
+NOISE_BRIGHTFIELD_IMAG = 8e-2
+
+# Set the seed for reproducibility
+np.random.seed(1234)
 
 # Define the pupil function for noise in holography and ISCAT
 def crop(pupil_radius):
@@ -136,7 +139,7 @@ def main():
     #Save the data
     np.save(f"../data/{OPTICS_CASE}_data.npy", frame)
     np.save(f"../data/{OPTICS_CASE}_labels.npy", labels)
-    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,-1])
+    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,-1], cmap = "gray")
 
 if __name__ == "__main__":
     main()
