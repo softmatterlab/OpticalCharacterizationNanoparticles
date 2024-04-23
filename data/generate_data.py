@@ -6,17 +6,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define the parameters of the optics
-IMAGE_SIZE = 256
+IMAGE_SIZE = 512
 NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "brightfield"
+OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (25e-9, 200e-9)
 REFRACTIVE_INDEX = (1.37, 1.6)
-N_PARTICLES = 50
+N_PARTICLES = 100
 Z_RANGE = (-10, 10)
 
 # Define the parameters of the noise - Need to be tuned
@@ -40,12 +40,18 @@ CROP = dt.Lambda(crop, pupil_radius=lambda: 0.8*IMAGE_SIZE)
 HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1=0 + np.random.randn() * 0.5)
 VC = dt.VerticalComa(coefficient=lambda c2:c2, c2=0 + np.random.randn() * 0.5)
 
-def get_label(image):
-    px = np.array(image.get_property("position")) - IMAGE_SIZE / 2
-    z = image.get_property("z")
-    r = image.get_property("radius")
-    n = image.get_property("refractive_index") - 1.33
-    return np.array([px[0], px[1], z, r, n])
+def get_labels(image):
+    array = np.zeros((N_PARTICLES, 5), dtype = np.float32)
+    count = 0
+    for property in image.properties:
+        if "position" in property:
+            px = property["position"]
+            z = property["z"]
+            r = property["radius"]
+            n = property["refractive_index"]
+            array[count, :] = np.array([px[0], px[1], z, r, n])
+            count += 1
+    return array
 
 def main():
 
@@ -78,7 +84,7 @@ def main():
             resolution=RESOLUTION,
             output_region = (0, 0, IMAGE_SIZE, IMAGE_SIZE),
             illumination_angle = np.pi,
-            pupil= HC >> VC >> CROP
+            pupil = HC >> VC >> CROP
         )
 
     #Define the particles
@@ -87,11 +93,10 @@ def main():
         refractive_index=lambda: np.random.uniform(*REFRACTIVE_INDEX),
         position = lambda: np.random.uniform(6, IMAGE_SIZE-6, 2),
         z=lambda: np.random.uniform(*Z_RANGE),
-        L=100,
-        )
+        L=100) ^ N_PARTICLES
     
     #Define the optics and particles.
-    training_data = optics(particles^N_PARTICLES) 
+    training_data = optics(particles) 
 
     #Gaussian and poisson noise
     if NOISE == True:
@@ -116,19 +121,22 @@ def main():
         training_data = (training_data >> dt.Real()) & (training_data >> dt.Imag())
         training_data = training_data >> dt.Merge(lambda: lambda x: np.concatenate( [np.array(_x) for _x in x], axis=-1 ))
 
+    #To get the labels
+    training_data.store_properties()
+
     #Generate the data
     frame = training_data.update().resolve()
 
-    #TODO - get labels
+    #Get the labels
+    labels = get_labels(training_data)
 
     #Transform the data into a numpy array
     frame = np.array(frame, dtype = np.float32)
 
     #Save the data
     np.save(f"../data/{OPTICS_CASE}_data.npy", frame)
-    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,0])
-
-    #TODO - save labels
+    np.save(f"../data/{OPTICS_CASE}_labels.npy", labels)
+    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,-1])
 
 if __name__ == "__main__":
     main()
