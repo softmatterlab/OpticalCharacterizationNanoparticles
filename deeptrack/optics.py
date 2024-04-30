@@ -353,12 +353,13 @@ To fix, set magnification to {required_upscale}, and downsample the resulting im
 
         defocus = np.reshape(defocus, (-1, 1, 1))
         z_shift = defocus * np.expand_dims(z_shift, axis=0)
-
+        #print(self.pupil)
         if include_aberration:
             pupil = self.pupil
             if isinstance(pupil, Feature):
 
                 pupil_function = pupil(pupil_function)
+
             elif isinstance(pupil, np.ndarray):
                 pupil_function *= pupil
 
@@ -669,6 +670,12 @@ class Brightfield(Optics):
                 include_aberration=True,
                 **kwargs,
             )[0],
+            self._pupil(
+                volume.shape[:2],
+                defocus=[0],
+                include_aberration=True,
+                **kwargs,
+            )[0]
         ]
 
         pupil_step = np.fft.fftshift(pupils[0])
@@ -690,14 +697,17 @@ class Brightfield(Optics):
             light = np.fft.ifft2(light_in)
             light_out = light * np.exp(1j * ri_slice * voxel_size[-1] * K)
             light_in = np.fft.fft2(light_out)
-
-        shifted_pupil = np.fft.fftshift(pupils[-1])
+  
+        shifted_pupil = np.fft.fftshift(pupils[1])
         light_in_focus = light_in * shifted_pupil
-
+        #import matplotlib.pyplot as plt
+        #plt.imshow(light_in_focus.imag)
+        #plt.show()
         if len(fields) > 0:
             field = np.sum(fields, axis=0)
             light_in_focus += field[..., 0]
-
+        shifted_pupil = np.fft.fftshift(pupils[-1])
+        light_in_focus = light_in_focus * shifted_pupil
         # Mask to remove light outside the pupil.
         mask = np.abs(shifted_pupil) > 0
         light_in_focus = light_in_focus * mask
