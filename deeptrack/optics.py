@@ -684,7 +684,7 @@ class Brightfield(Optics):
         light_in = self.illumination.resolve(light_in)
         light_in = np.fft.fft2(light_in)
 
-        K = 2 * np.pi / kwargs["wavelength"]
+        K = 2 * np.pi / kwargs["wavelength"]*kwargs["refractive_index_medium"]
 
         z = z_limits[1]
         for i, z in zip(index_iterator, z_iterator):
