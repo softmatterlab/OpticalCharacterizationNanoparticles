@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -22,9 +22,9 @@ Z_RANGE = (-7.5, 7.5)
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
 NOISE_DARKFIELD = 5e-5
-NOISE_ISCAT = 8e-4
-NOISE_BRIGHTFIELD_REAL = 5e-3
-NOISE_BRIGHTFIELD_IMAG = 1e-1
+NOISE_ISCAT = 5e-3
+NOISE_BRIGHTFIELD_REAL = 5e-2
+NOISE_BRIGHTFIELD_IMAG = 5e-2
 
 # Set the seed for reproducibility
 np.random.seed(1234)
@@ -157,15 +157,11 @@ def main():
             training_data = training_data >> dt.Poisson(snr=lambda: 7 + np.random.rand() * 10, background=1) >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_ISCAT)
         elif OPTICS_CASE == "brightfield":
 
-            real_noise = dt.Gaussian(
+            noise = dt.Gaussian(
                 mu=0, 
-                sigma=lambda: np.random.rand() * NOISE_BRIGHTFIELD_REAL,
+                sigma=lambda: np.random.rand() * NOISE_BRIGHTFIELD_REAL + np.random.rand()*NOISE_BRIGHTFIELD_IMAG* 1j,
             )
-            noise = real_noise >> dt.Gaussian(
-                mu=0, 
-                sigma=lambda real_sigma: real_sigma * NOISE_BRIGHTFIELD_IMAG* 1j,
-                real_sigma=real_noise.sigma
-            )
+
             training_data = training_data >> noise
     
     #To get the labels
