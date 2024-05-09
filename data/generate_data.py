@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -21,7 +21,7 @@ Z_RANGE = (-7.5, 7.5)
 
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
-NOISE_DARKFIELD = 5e-5
+NOISE_DARKFIELD = 1e-5
 NOISE_ISCAT = 5e-3
 NOISE_BRIGHTFIELD_REAL = 3e-2
 NOISE_BRIGHTFIELD_IMAG = 3e-2
@@ -67,7 +67,7 @@ def main():
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
             return_field=True,
-            pupil= HC >> VC >> CROP
+            pupil=HC >> VC >> CROP
         )
 
     elif OPTICS_CASE == "darkfield":
@@ -77,7 +77,7 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            illumination_angle = np.pi
+            illumination_angle=np.pi
         )
 
     elif OPTICS_CASE == "iscat":
@@ -86,16 +86,16 @@ def main():
             magnification=MAGNIFICATION,
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
-            output_region = (0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            illumination_angle = np.pi,
-            pupil = HC >> VC >> CROP
+            output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
+            illumination_angle=np.pi,
+            pupil=HC >> VC >> CROP
         )
 
     #Define the particles
     particles = dt.MieSphere(
         radius=lambda: np.random.uniform(*RADIUS_RANGE),
         refractive_index=lambda: np.random.uniform(*REFRACTIVE_INDEX),
-        position = lambda: np.random.uniform(20, IMAGE_SIZE-20, 2),
+        position=lambda: np.random.uniform(20, IMAGE_SIZE-20, 2),
         z=lambda: np.random.uniform(*Z_RANGE),
         L=100) ^ N_PARTICLES
     
