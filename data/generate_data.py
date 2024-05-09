@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -23,8 +23,8 @@ Z_RANGE = (-7.5, 7.5)
 NOISE = True
 NOISE_DARKFIELD = 5e-5
 NOISE_ISCAT = 5e-3
-NOISE_BRIGHTFIELD_REAL = 5e-2
-NOISE_BRIGHTFIELD_IMAG = 5e-2
+NOISE_BRIGHTFIELD_REAL = 3e-2
+NOISE_BRIGHTFIELD_IMAG = 3e-2
 
 # Set the seed for reproducibility
 np.random.seed(1234)
@@ -40,8 +40,8 @@ def crop(pupil_radius):
     return inner
 
 CROP = dt.Lambda(crop, pupil_radius=lambda: 0.8*IMAGE_SIZE)
-HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1 = 0.5)
-VC = dt.VerticalComa(coefficient=lambda c2:c2, c2 = 0.5)
+HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1 = 0.3)
+VC = dt.VerticalComa(coefficient=lambda c2:c2, c2 = 0.3)
 
 def get_labels(image):
     array = np.zeros((N_PARTICLES, 5), dtype = np.float32)
@@ -55,53 +55,6 @@ def get_labels(image):
             array[count, :] = np.array([px[0], px[1], z, r, n])
             count += 1
     return array
-
-def generate_sine_wave_2D(p):
-    """
-    Generate a 2D sine wave pattern with adjustable direction.
-
-    Parameters:
-    - N: The size of the square image (N x N).
-    - frequency: The frequency of the sine wave.
-    - direction_degrees: The direction of the wave in degrees.
-
-    Returns:
-    - A 2D numpy array representing the sine wave pattern.
-    """
-
-    def inner(image):
-        N = image.shape[0]
-        frequency = np.random.uniform(1, 20)
-        direction_degrees = np.random.uniform(44,45)
-        warp_factor = np.random.uniform(0.1, 0.9)
-        
-        x = np.linspace(-np.pi, np.pi, N)
-        y = np.linspace(-np.pi, np.pi, N)
-
-        # Convert direction to radians
-        direction_radians = np.radians(direction_degrees)
-
-        # Calculate displacement for both x and y with warping
-        warped_x = x * np.cos(direction_radians) + warp_factor * np.sin(direction_radians * x)
-        warped_y = y * np.sin(direction_radians) + warp_factor * np.sin(direction_radians * y)
-
-        # Generate 2D sine wave using the warped coordinates
-        sine2D = 128.0 + (127.0 * np.sin((warped_x[:, np.newaxis] + warped_y) * frequency))
-        sine2D = sine2D / 255.0
-
-        #flip or mirror the pattern
-        if np.random.rand()>0.5:
-            sine2D=np.flip(sine2D,0)
-        if np.random.rand()>0.5:
-            sine2D=np.flip(sine2D,1)
-        if np.random.rand()>0.5:
-            sine2D=np.transpose(sine2D)
-
-        image = image + np.expand_dims(sine2D, axis = -1)*p
-
-        return image
-
-    return inner
 
 
 def main():
@@ -146,8 +99,20 @@ def main():
         z=lambda: np.random.uniform(*Z_RANGE),
         L=100) ^ N_PARTICLES
     
+    #Define small noise for the particles inside optics
+    if OPTICS_CASE == "brightfield":
+        noise = dt.Gaussian(
+            mu=0, 
+            sigma=lambda: 1e-3*np.random.rand() + 1e-3*np.random.rand()*1j,
+        )
+    else:
+        noise = dt.Gaussian(
+            mu=0, 
+            sigma=lambda: 1e-3*np.random.rand(),
+            )
+
     #Define the optics and particles.
-    training_data = optics(particles) 
+    training_data = optics(particles>>noise) 
 
     #Gaussian and poisson noise
     if NOISE == True:
