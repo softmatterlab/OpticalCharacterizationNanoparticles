@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -22,7 +22,7 @@ Z_RANGE = (-7.5, 7.5)
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
 NOISE_DARKFIELD = 1e-5
-NOISE_ISCAT = 5e-3
+NOISE_ISCAT = 3e-3
 NOISE_BRIGHTFIELD_REAL = 3e-2
 NOISE_BRIGHTFIELD_IMAG = 3e-2
 
