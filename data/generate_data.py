@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -77,7 +77,8 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            illumination_angle=np.pi
+            #coherence_length=50e-6,
+            illumination_angle=0,
         )
 
     elif OPTICS_CASE == "iscat":
@@ -140,8 +141,8 @@ def main():
 
     if OPTICS_CASE == "brightfield":
         new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype = np.float32)
-        new_frame[...,0] = np.squeeze(np.real(frame))
-        new_frame[...,1] = np.squeeze(np.imag(frame))
+        new_frame[..., 0] = np.squeeze(np.real(frame))
+        new_frame[..., 1] = np.squeeze(np.imag(frame))
         frame = new_frame
 
     #Transform the data into a numpy array
