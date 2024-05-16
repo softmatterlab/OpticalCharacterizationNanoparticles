@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 633e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -77,7 +77,7 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            #coherence_length=50e-6,
+            coherence_length=1e-8,
             illumination_angle=0,
         )
 
