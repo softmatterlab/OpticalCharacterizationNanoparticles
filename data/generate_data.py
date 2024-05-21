@@ -9,19 +9,19 @@ import matplotlib.pyplot as plt
 IMAGE_SIZE = 512
 NA = 1.3
 MAGNIFICATION = 1
-WAVELENGTH = 633e-9
+WAVELENGTH = 532e-9
 RESOLUTION = 1.14e-7
 OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
 REFRACTIVE_INDEX = (1.37, 1.6)
-N_PARTICLES = 10
+N_PARTICLES = 100
 Z_RANGE = (-7.5, 7.5)
 
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
-NOISE_DARKFIELD = 0#1e-5
+NOISE_DARKFIELD = 1e-5
 NOISE_ISCAT = 3e-3
 NOISE_BRIGHTFIELD_REAL = 3e-2
 NOISE_BRIGHTFIELD_IMAG = 3e-2
@@ -78,7 +78,7 @@ def main():
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
             #coherence_length=1e-8,
-            offset_z = 10,
+            #offset_z = 10,
             illumination_angle=0,
         )
 
@@ -115,7 +115,7 @@ def main():
     else:
         noise = dt.Gaussian(
             mu=0, 
-            sigma=lambda: 1e-3*np.random.rand()*0,
+            sigma=lambda: 1e-3*np.random.rand(),
         )
 
     #Define the optics and particles.
@@ -128,7 +128,6 @@ def main():
         elif OPTICS_CASE == "iscat":
             training_data = training_data >> dt.Poisson(snr=lambda: 7 + np.random.rand() * 10, background=1) >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_ISCAT)
         elif OPTICS_CASE == "brightfield":
-
             noise = dt.Gaussian(
                 mu=0, 
                 sigma=lambda: np.random.rand() * NOISE_BRIGHTFIELD_REAL + np.random.rand()*NOISE_BRIGHTFIELD_IMAG* 1j,
