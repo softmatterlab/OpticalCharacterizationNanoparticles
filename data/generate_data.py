@@ -16,12 +16,12 @@ OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
 REFRACTIVE_INDEX = (1.37, 1.6)
-N_PARTICLES = 100
+N_PARTICLES = 10
 Z_RANGE = (-7.5, 7.5)
 
 # Define the parameters of the noise - Need to be tuned
 NOISE = True
-NOISE_DARKFIELD = 1e-5
+NOISE_DARKFIELD = 0#1e-5
 NOISE_ISCAT = 3e-3
 NOISE_BRIGHTFIELD_REAL = 3e-2
 NOISE_BRIGHTFIELD_IMAG = 3e-2
@@ -77,7 +77,8 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            coherence_length=1e-8,
+            #coherence_length=1e-8,
+            offset_z = 10,
             illumination_angle=0,
         )
 
@@ -106,11 +107,16 @@ def main():
             mu=0, 
             sigma=lambda: 1e-3*np.random.rand() + 1e-3*np.random.rand()*1j,
         )
-    else:
+    elif OPTICS_CASE == "iscat":
         noise = dt.Gaussian(
             mu=0, 
             sigma=lambda: 1e-3*np.random.rand(),
             )
+    else:
+        noise = dt.Gaussian(
+            mu=0, 
+            sigma=lambda: 1e-3*np.random.rand()*0,
+        )
 
     #Define the optics and particles.
     training_data = optics(particles>>noise) 
