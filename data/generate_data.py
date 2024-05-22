@@ -11,7 +11,7 @@ NA = 1.3
 MAGNIFICATION = 1
 WAVELENGTH = 532e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "darkfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "iscat" # "brightfield", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
