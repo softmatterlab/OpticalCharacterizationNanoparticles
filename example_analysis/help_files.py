@@ -1,9 +1,77 @@
 import numpy as np
 import skimage
 import matplotlib.pyplot as plt
-import scipy
-from scipy.optimize import minimize
-import rvt
+
+def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
+    """
+    Plot the frame with the detected particles.
+    
+    Parameters:
+    data (np.ndarray): Input image data.
+    positions (np.ndarray): Detected particle positions.
+    s (int): Radius of the circle.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    cmap (str): Colormap of the image.
+    save_path (str): Path to save the plot.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.imshow(data, cmap=cmap)
+    ax.scatter(positions[:, 1], positions[:, 0], s = s, facecolors='none', edgecolors='r')
+    ax.set_title(title)
+    ax.axis('off')
+
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def plot_frame_with_detections_filled(data, positions, values, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
+    """
+    Plot the frame with the detected particles.
+    
+    Parameters:
+    data (np.ndarray): Input image data.
+    positions (np.ndarray): Detected particle positions.
+    values (np.ndarray): Values associated to the positions.
+    s (int): Radius of the circle.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    cmap (str): Colormap of the image.
+    save_path (str): Path to save the plot.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.imshow(data, cmap=cmap)
+    ax.scatter(positions[:, 1], positions[:, 0], s = s, c = values, facecolors='none', edgecolors='r', alpha = alpha)
+    ax.set_title(title)
+    ax.axis('off')
+
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def plot_labels(labels, bins = 20, figsize = (12,3), color = 'darkblue'):
+    """
+    Plot labels as histograms.
+
+    Parameters:
+    labels (np.ndarray): Labels: (pos_x, pos_y, pos_z, radius, ri)
+    bins (int) : Number of bins in histogram.
+    figsize (tuple): Figure size.
+    color (str): Color of histograms.
+    """
+
+    plt.figure(figsize=figsize)
+    plt.subplot(131)
+    plt.hist(labels[:,2], bins=bins, color = color)
+    plt.title("Z-position (in pixels)")
+    plt.subplot(132)
+    plt.hist(labels[:,3]*1e9, bins=bins, color = color, range=(75, 225))
+    plt.title("Radius(nm)")
+    plt.subplot(133)
+    plt.hist(labels[:,4], bins=bins, color = color, range=(1.35, 1.62))
+    plt.title("Refractive index")
+    plt.show()
+
 
 def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_detection_map=False):
     """
@@ -21,6 +89,9 @@ def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_det
     np.ndarray: Detected points.
     np.ndarray (optional): Detection map if return_detection_map is True.
     """
+
+    import rvt
+
     # Apply Radial Variance Transform of the image
     det = rvt.rvt(data[..., 0], rmin=rmin, rmax=rmax)
 
@@ -106,33 +177,35 @@ def get_F1_score(Pred_Particles, GT_particles):
     F1 = 2 * TP / (2 * TP + FP + FN)
     return F1
 
-def get_polarizability_rr(radius, refractive_index):
+def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.33):
     """
     Calculate the polarizability of a particle.
+    Equation: polarizability = Volume * Refractive Index Difference
     
     Parameters:
     radius (float): Radius of the particle.
     refractive_index (float): Refractive index of the particle.
+    refractive_index_medium (float): Refractive index of the medium.
     
     Returns:
     np.ndarray: Polarizability.
     """
-    return np.array(4/3 * np.pi * radius**3 * (refractive_index - 1.333))
+    return np.array(4/3 * np.pi * radius**3 * (refractive_index - refractive_index_medium))
 
-def get_polarizability_rr2(radius, refractive_index, nm=1.333):
+def get_polarizability_rr2(radius, refractive_index, refractive_index_medium=1.333):
     """
     Calculate the polarizability of a particle with given medium refractive index.
     
     Parameters:
     radius (float): Radius of the particle.
     refractive_index (float): Refractive index of the particle.
-    nm (float): Refractive index of the medium.
+    refractive_index_medium (float): Refractive index of the medium.
     
     Returns:
     float: Polarizability.
     """
     V = 4/3 * np.pi * radius**3
-    return 3/2 * V * (refractive_index**2 - nm**2) / (2 * nm**2 + refractive_index**2)
+    return 3/2 * V * (refractive_index**2 - refractive_index_medium**2) / (2 * refractive_index_medium**2 + refractive_index**2)
 
 def form_factor(radius, nm=1.333, wavelength=532):
     """
@@ -163,6 +236,33 @@ def signal_iscat(form_factor, polarizability):
     """
     return np.abs(form_factor) * polarizability
 
+def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
+    """
+    Calculates the range of polarizabilities given arrays of possible radius and refractive indeces.
+
+    Parameters:
+    rad_range (np.ndarray): Array of radius values.
+    ri_range (np.ndarray): Array of refractive index values.
+    w: (float): Wavelength in mikrometer.
+    nm: (float): Refractive index.
+
+    Returns:
+    tuple: min and max values of possible values
+    
+    """
+
+    k = (2 * np.pi * nm) / w 
+    q = 2 * k * np.sin(np.pi/2)
+
+    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    f = lambda rad: np.abs(3 / (q*rad * 1e6)**3 *((np.sin(q*rad * 1e6) - q*(rad * 1e6)*np.cos(q*rad * 1e6))))
+
+    f_dm = lambda rad, ri: dm(rad, ri) * f(rad)
+
+    vals = f_dm(rad_range[0], ri_range[0]), f_dm(rad_range[1], ri_range[0]), f_dm(rad_range[0], ri_range[1]), f_dm(rad_range[1], ri_range[1])
+
+    return min(vals), max(vals)
+
 def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=False):
     """
     Fit a 2D Gaussian to the input data and return the Gaussian values.
@@ -176,6 +276,8 @@ def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=Fals
     Returns:
     np.ndarray or float: Gaussian values or integral of Gaussian.
     """
+    from scipy import optimize
+
     height, width = input_data.shape
 
     # Upscale the input data
@@ -190,7 +292,7 @@ def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=Fals
         return a * np.exp(-((x[:, 0] - b)**2 + (x[:, 1] - c)**2) / (2 * d**2)) + e
 
     # Fit the Gaussian to the data
-    f, _ = scipy.optimize.curve_fit(
+    f, _ = optimize.curve_fit(
         fitf,
         data,
         input_data.flatten() - np.mean(input_data.flatten()),
