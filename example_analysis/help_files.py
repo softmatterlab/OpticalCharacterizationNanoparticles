@@ -250,14 +250,8 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
     tuple: min and max values of possible values
     
     """
-
-    k = (2 * np.pi * nm) / w 
-    q = 2 * k * np.sin(np.pi/2)
-
     dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
-    f = lambda rad: np.abs(3 / (q*rad * 1e6)**3 *((np.sin(q*rad * 1e6) - q*(rad * 1e6)*np.cos(q*rad * 1e6))))
-
-    f_dm = lambda rad, ri: dm(rad, ri) * f(rad)
+    f_dm = lambda rad, ri: dm(rad, ri)
 
     vals = f_dm(rad_range[0], ri_range[0]), f_dm(rad_range[1], ri_range[0]), f_dm(rad_range[0], ri_range[1]), f_dm(rad_range[1], ri_range[1])
 
