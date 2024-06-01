@@ -257,6 +257,42 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     return min(vals), max(vals)
 
+def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
+    """
+    Calculates the range of signals given arrays of possible radius and refractive indeces.
+
+    Parameters:
+    rad_range (np.ndarray): Array of radius values.
+    ri_range (np.ndarray): Array of refractive index values.
+    w: (float): Wavelength in mikrometer.
+    nm: (float): Refractive index.
+
+    Returns:
+    tuple: min and max values of possible values
+    
+    """
+    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    f_dm = lambda rad, ri: dm(rad, ri)
+
+    form_f = lambda rad: form_factor(rad*1e6, nm=nm, wavelength=w)
+
+    vals = [
+        f_dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[0])),
+        f_dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[1])),
+
+        f_dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[0])),
+        f_dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[1])),
+
+        f_dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[0])),
+        f_dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[1])),
+
+        f_dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[0])),
+        f_dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[1]))
+        ]
+
+    return min(vals), max(vals)
+
+
 def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=False):
     """
     Fit a 2D Gaussian to the input data and return the Gaussian values.
