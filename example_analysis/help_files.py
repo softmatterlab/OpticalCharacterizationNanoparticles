@@ -257,6 +257,31 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     return min(vals), max(vals)
 
+def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
+
+    """
+    Calculates the mean and standard deviation of polarizabilities given arrays of possible radius and refractive indeces.
+
+    Parameters:
+    rad_range (np.ndarray): Array of radius values.
+    ri_range (np.ndarray): Array of refractive index values.
+    w: (float): Wavelength in mikrometer.
+    nm: (float): Refractive index.
+
+    Returns:
+    tuple: mean and standard deviation of possible values
+    
+    """
+    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    f_dm = lambda rad, ri: dm(rad, ri)
+
+    rad = np.linspace(rad_range[0], rad_range[1], 1000)
+    ri = np.linspace(ri_range[0], ri_range[1], 1000)
+
+    vals = [f_dm(r, i) for r in rad for i in ri]
+
+    return np.mean(vals), np.std(vals)
+
 def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     """
     Calculates the range of signals given arrays of possible radius and refractive indeces.
@@ -292,6 +317,29 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     return min(vals), max(vals)
 
+def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
+    """
+    Calculates the mean and standard deviation of signals given arrays of possible radius and refractive indeces.
+
+    Parameters:
+    rad_range (np.ndarray): Array of radius values.
+    ri_range (np.ndarray): Array of refractive index values.
+    w: (float): Wavelength in mikrometer.
+    nm: (float): Refractive index.
+
+    Returns:
+    tuple: mean and standard deviation of possible values
+    
+    """
+    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    f_dm = lambda rad, ri: dm(rad, ri)
+
+    rad = np.linspace(rad_range[0], rad_range[1], 1000)
+    ri = np.linspace(ri_range[0], ri_range[1], 1000)
+
+    vals = [f_dm(r, i) * np.abs(form_factor(r*1e6, nm=nm, wavelength=w)) for r in rad for i in ri]
+
+    return np.mean(vals), np.std(vals)
 
 def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=False):
     """
