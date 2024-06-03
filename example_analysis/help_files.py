@@ -405,6 +405,8 @@ def radial_variance_gaussian(input_data, rmin=3, rmax=20, binary_gauss=False, re
     Returns:
     float or np.ndarray: Weighted sum of the pixel values or the integral of the Gaussian.
     """
+    import rvt
+
     # Apply the Radial Variance Transform to the input data (imaginary part)
     input_data_rvt = rvt.rvt(input_data[..., 0], rmin=rmin, rmax=rmax)
 
