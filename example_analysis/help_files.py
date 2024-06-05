@@ -42,6 +42,9 @@ def plot_frame_with_detections_filled(data, positions, values, s=100, title='Fra
     fig, ax = plt.subplots(figsize=figsize)
     ax.imshow(data, cmap=cmap)
     ax.scatter(positions[:, 1], positions[:, 0], s = s, c = values, facecolors='none', edgecolors='r', alpha = alpha)
+    #Add colorbar
+    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap='viridis'))
+    cbar.set_label('Value')
     ax.set_title(title)
     ax.axis('off')
 
@@ -192,7 +195,7 @@ def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.33
     """
     return np.array(4/3 * np.pi * radius**3 * (refractive_index - refractive_index_medium))
 
-def get_polarizability_rr2(radius, refractive_index, refractive_index_medium=1.333):
+def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     """
     Calculate the polarizability of a particle with given medium refractive index.
     
@@ -250,8 +253,8 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
     tuple: min and max values of possible values
     
     """
-    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
-    f_dm = lambda rad, ri: dm(rad, ri)
+    dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
+    f_dm = lambda rad, ri: dm(rad*1e6, ri)
 
     vals = f_dm(rad_range[0], ri_range[0]), f_dm(rad_range[1], ri_range[0]), f_dm(rad_range[0], ri_range[1]), f_dm(rad_range[1], ri_range[1])
 
@@ -263,7 +266,7 @@ def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     Calculates the mean and standard deviation of polarizabilities given arrays of possible radius and refractive indeces.
 
     Parameters:
-    rad_range (np.ndarray): Array of radius values.
+    rad_range (np.ndarray): Array of radius values. Assume it is in nanometers
     ri_range (np.ndarray): Array of refractive index values.
     w: (float): Wavelength in mikrometer.
     nm: (float): Refractive index.
@@ -272,13 +275,13 @@ def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     tuple: mean and standard deviation of possible values
     
     """
-    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
     f_dm = lambda rad, ri: dm(rad, ri)
 
     rad = np.linspace(rad_range[0], rad_range[1], 1000)
     ri = np.linspace(ri_range[0], ri_range[1], 1000)
 
-    vals = [f_dm(r, i) for r in rad for i in ri]
+    vals = [f_dm(r*1e6, i) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
 
@@ -287,7 +290,7 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     Calculates the range of signals given arrays of possible radius and refractive indeces.
 
     Parameters:
-    rad_range (np.ndarray): Array of radius values.
+    rad_range (np.ndarray): Array of radius values. Assume it is in nanometers
     ri_range (np.ndarray): Array of refractive index values.
     w: (float): Wavelength in mikrometer.
     nm: (float): Refractive index.
@@ -296,7 +299,7 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     tuple: min and max values of possible values
     
     """
-    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
     f_dm = lambda rad, ri: dm(rad, ri)
 
     form_f = lambda rad: form_factor(rad*1e6, nm=nm, wavelength=w)
@@ -322,7 +325,7 @@ def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     Calculates the mean and standard deviation of signals given arrays of possible radius and refractive indeces.
 
     Parameters:
-    rad_range (np.ndarray): Array of radius values.
+    rad_range (np.ndarray): Array of radius values. Assume it is in nanometers
     ri_range (np.ndarray): Array of refractive index values.
     w: (float): Wavelength in mikrometer.
     nm: (float): Refractive index.
@@ -331,7 +334,7 @@ def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     tuple: mean and standard deviation of possible values
     
     """
-    dm = lambda rad, ri: ((4 * np.pi) / 3) * ((rad * 1e6) ** 3) * (ri - 1.33)
+    dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
     f_dm = lambda rad, ri: dm(rad, ri)
 
     rad = np.linspace(rad_range[0], rad_range[1], 1000)
