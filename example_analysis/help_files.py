@@ -17,7 +17,7 @@ def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6
     """
     fig, ax = plt.subplots(figsize=figsize)
     ax.imshow(data, cmap=cmap)
-    ax.scatter(positions[:, 1], positions[:, 0], s = s, facecolors='none', edgecolors='r')
+    ax.scatter(positions[:, 1], positions[:, 0], s=s, facecolors='none', edgecolors='r')
     ax.set_title(title)
     ax.axis('off')
 
@@ -44,7 +44,7 @@ def plot_frame_with_detections_filled(data, positions, values, s=100, title='Fra
     ax.scatter(positions[:, 1], positions[:, 0], s = s, c = values, facecolors='none', edgecolors='r', alpha = alpha)
     #Add colorbar
     cbar = plt.colorbar(plt.cm.ScalarMappable(cmap='viridis'))
-    cbar.set_label('Value')
+    cbar.set_label('Signal strength')
     ax.set_title(title)
     ax.axis('off')
 
@@ -65,13 +65,13 @@ def plot_labels(labels, bins = 20, figsize = (12,3), color = 'darkblue'):
 
     plt.figure(figsize=figsize)
     plt.subplot(131)
-    plt.hist(labels[:,2], bins=bins, color = color)
+    plt.hist(labels[:,2], bins=bins, color=color)
     plt.title("Z-position (in pixels)")
     plt.subplot(132)
-    plt.hist(labels[:,3]*1e9, bins=bins, color = color, range=(75, 225))
+    plt.hist(labels[:,3]*1e9, bins=bins, color=color, range=(75, 225))
     plt.title("Radius(nm)")
     plt.subplot(133)
-    plt.hist(labels[:,4], bins=bins, color = color, range=(1.35, 1.62))
+    plt.hist(labels[:,4], bins=bins, color=color, range=(1.35, 1.62))
     plt.title("Refractive index")
     plt.show()
 
@@ -254,9 +254,13 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
     
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
-    f_dm = lambda rad, ri: dm(rad*1e6, ri)
 
-    vals = f_dm(rad_range[0], ri_range[0]), f_dm(rad_range[1], ri_range[0]), f_dm(rad_range[0], ri_range[1]), f_dm(rad_range[1], ri_range[1])
+    vals = [
+        dm(rad_range[0], ri_range[0]), 
+        dm(rad_range[1], ri_range[0]), 
+        dm(rad_range[0], ri_range[1]), 
+        dm(rad_range[1], ri_range[1])
+        ]
 
     return min(vals), max(vals)
 
@@ -276,12 +280,12 @@ def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
-    f_dm = lambda rad, ri: dm(rad, ri)
+   
 
     rad = np.linspace(rad_range[0], rad_range[1], 1000)
     ri = np.linspace(ri_range[0], ri_range[1], 1000)
 
-    vals = [f_dm(r*1e6, i) for r in rad for i in ri]
+    vals = [dm(r, i) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
 
@@ -300,22 +304,21 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
-    f_dm = lambda rad, ri: dm(rad, ri)
 
     form_f = lambda rad: form_factor(rad*1e6, nm=nm, wavelength=w)
 
     vals = [
-        f_dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[0])),
-        f_dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[1])),
+        dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[0])),
+        dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[1])),
 
-        f_dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[0])),
-        f_dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[1])),
+        dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[0])),
+        dm(rad_range[1], ri_range[0]) * np.abs(form_f(rad_range[1])),
 
-        f_dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[0])),
-        f_dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[1])),
+        dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[0])),
+        dm(rad_range[0], ri_range[1]) * np.abs(form_f(rad_range[1])),
 
-        f_dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[0])),
-        f_dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[1]))
+        dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[0])),
+        dm(rad_range[1], ri_range[1]) * np.abs(form_f(rad_range[1]))
         ]
 
     return min(vals), max(vals)
@@ -335,12 +338,11 @@ def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
-    f_dm = lambda rad, ri: dm(rad, ri)
 
     rad = np.linspace(rad_range[0], rad_range[1], 1000)
     ri = np.linspace(ri_range[0], ri_range[1], 1000)
 
-    vals = [f_dm(r, i) * np.abs(form_factor(r*1e6, nm=nm, wavelength=w)) for r in rad for i in ri]
+    vals = [dm(r, i) * np.abs(form_factor(r*1e6, nm=nm, wavelength=w)) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
 
