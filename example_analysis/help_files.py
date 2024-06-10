@@ -41,10 +41,7 @@ def plot_frame_with_detections_filled(data, positions, values, s=100, title='Fra
     """
     fig, ax = plt.subplots(figsize=figsize)
     ax.imshow(data, cmap=cmap)
-    ax.scatter(positions[:, 1], positions[:, 0], s = s, c = values, facecolors='none', edgecolors='r', alpha = alpha)
-    #Add colorbar
-    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap='viridis'))
-    cbar.set_label('Signal strength')
+    ax.scatter(positions[:, 1], positions[:, 0], s=s, c=values, facecolors='none', edgecolors='r', alpha=alpha)
     ax.set_title(title)
     ax.axis('off')
 
@@ -180,7 +177,7 @@ def get_F1_score(Pred_Particles, GT_particles):
     F1 = 2 * TP / (2 * TP + FP + FN)
     return F1
 
-def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.33):
+def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.333):
     """
     Calculate the polarizability of a particle.
     Equation: polarizability = Volume * Refractive Index Difference
