@@ -724,16 +724,16 @@ class MieScatterer(Scatterer):
                 input_polarization = input_polarization.to("rad")
                 input_polarization = input_polarization.magnitude
 
-            S1_coef = np.sin(phi_field + input_polarization)
-            S2_coef = np.cos(phi_field + input_polarization)
+            S1_coef = np.sin(phi_field + input_polarization) if not is_iscat else 1/2
+            S2_coef = np.cos(phi_field + input_polarization) if not is_iscat else 1/2
 
         if isinstance(output_polarization, (float, int, Quantity)):
             if isinstance(input_polarization, Quantity):
                 output_polarization = output_polarization.to("rad")
                 output_polarization = output_polarization.magnitude
 
-            S1_coef *= np.sin(phi_field + output_polarization)
-            S2_coef *= np.cos(phi_field + output_polarization) * illumination_angle_field
+            S1_coef *= np.sin(phi_field + output_polarization) if not is_iscat else 1
+            S2_coef *= np.cos(phi_field + output_polarization) * illumination_angle_field if not is_iscat else 1
 
         # Wave vector
         k = 2 * np.pi / wavelength * refractive_index_medium
