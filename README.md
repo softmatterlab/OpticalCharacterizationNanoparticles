@@ -1,6 +1,6 @@
 # Optical-label-free-microscopy-characterization-of-dielectric-nanoparticles
 
-By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Daniel Midtvedt, Fredrik Höök and Giovanni Volpe
+By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Giovanni Volpe, Fredrik Höök and Daniel Midtvedt.
 
 
 
@@ -12,7 +12,7 @@ In this tutorial, we provide three notebooks focusing on particle characterizati
 More...
 
 ## Dependencies
-To run notebook please install deeplay (https://github.com/DeepTrackAI/deeplay) and its following dependencies.
+To run notebook please install deeplay (https://github.com/DeepTrackAI/deeplay), (https://github.com/DeepTrackAI/deeptrack) and its following dependencies.
 
 ## Usage
 ### Training-tutorials
