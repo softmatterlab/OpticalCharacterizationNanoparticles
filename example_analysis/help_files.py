@@ -208,7 +208,7 @@ def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     V = 4/3 * np.pi * radius**3
     return 3/2 * V * (refractive_index**2 - refractive_index_medium**2) / (2 * refractive_index_medium**2 + refractive_index**2)
 
-def form_factor(radius, theta = np.pi/2, nm=1.333, wavelength=532):
+def form_factor(radius, theta = np.pi/2, nm=1.333, wavelength=0.532):
     """
     Calculate the spherical form factor in nanometers.
     
@@ -238,7 +238,7 @@ def signal_iscat(form_factor, polarizability):
     """
     return np.abs(form_factor) * polarizability
 
-def darkfield_intensity(radius, ri, nm=1.333, wavelength=532, theta_max=None, na=1, Eill = 1):
+def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
     """
     Calculate the darkfield intensity captured by the camera.
     
@@ -275,7 +275,7 @@ def darkfield_intensity(radius, ri, nm=1.333, wavelength=532, theta_max=None, na
     
     return IcameradA
 
-def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=532, theta_max=None, na=1, Eill = 1):
+def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
     """
     Calculate the range of darkfield intensity captured by the camera.
     
@@ -291,7 +291,7 @@ def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=532, 
     Returns:
     tuple: Min and max values of the total intensity captured by the camera.
     """
-    values = [darkfield_intensity(radius=r, ri=ri, nm=nm, wavelength=wavelength, theta_max=theta_max, na=na, Eill=Eill) for r in radius_range for ri in ri_range]
+    values = [darkfield_intensity(radius=r*1e6, ri=ri, nm=nm, wavelength=wavelength, theta_max=theta_max, na=na, Eill=Eill) for r in radius_range for ri in ri_range]
 
     return min(values), max(values)
 
