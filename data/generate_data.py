@@ -11,7 +11,7 @@ NA = 1
 MAGNIFICATION = 1
 WAVELENGTH = 532e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "brightfield" # "brightfield", "darkfield", "iscat"
+OPTICS_CASE = "qf" # "qf", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -23,8 +23,8 @@ Z_RANGE = (-7.5, 7.5)
 NOISE = True
 NOISE_DARKFIELD = 1e-4
 NOISE_ISCAT = 1e-3
-NOISE_BRIGHTFIELD_REAL = 3e-2
-NOISE_BRIGHTFIELD_IMAG = 3e-2
+NOISE_QF_REAL = 3e-2
+NOISE_QF_IMAG = 3e-2
 
 # Set the seed for reproducibility
 np.random.seed(1234)
@@ -59,7 +59,7 @@ def get_labels(image):
 
 def main():
 
-    if OPTICS_CASE == "brightfield":
+    if OPTICS_CASE == "qf":
         optics = dt.Brightfield(
             NA=NA,
             magnification=MAGNIFICATION,
@@ -102,7 +102,7 @@ def main():
         L=100) ^ N_PARTICLES
     
     #Define small noise for the particles inside optics
-    if OPTICS_CASE == "brightfield":
+    if OPTICS_CASE == "qf":
         noise = dt.Gaussian(
             mu=0, 
             sigma=lambda: 1e-3*np.random.rand() + 1e-3*np.random.rand()*1j,
@@ -130,7 +130,7 @@ def main():
         elif OPTICS_CASE == "brightfield":
             noise = dt.Gaussian(
                 mu=0, 
-                sigma=lambda: np.random.rand() * NOISE_BRIGHTFIELD_REAL + np.random.rand()*NOISE_BRIGHTFIELD_IMAG* 1j,
+                sigma=lambda: np.random.rand() * NOISE_QF_REAL + np.random.rand()*NOISE_QF_IMAG* 1j,
             )
 
             training_data = training_data >> noise
@@ -144,7 +144,7 @@ def main():
     #Get the labels
     labels = get_labels(frame)
 
-    if OPTICS_CASE == "brightfield":
+    if OPTICS_CASE == "qf":
         new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype = np.float32)
         new_frame[..., 0] = np.squeeze(np.real(frame))
         new_frame[..., 1] = np.squeeze(np.imag(frame))

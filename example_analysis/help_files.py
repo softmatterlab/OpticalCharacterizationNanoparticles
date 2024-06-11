@@ -1,5 +1,6 @@
 import numpy as np
 import skimage
+from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
 def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
@@ -207,12 +208,13 @@ def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     V = 4/3 * np.pi * radius**3
     return 3/2 * V * (refractive_index**2 - refractive_index_medium**2) / (2 * refractive_index_medium**2 + refractive_index**2)
 
-def form_factor(radius, nm=1.333, wavelength=532):
+def form_factor(radius, theta = np.pi/2, nm=1.333, wavelength=532):
     """
     Calculate the spherical form factor in nanometers.
     
     Parameters:
     radius (float): Radius of the particle.
+    theta (float): Scattering angle in radians.
     nm (float): Refractive index of the medium.
     wavelength (float): Wavelength in nanometers.
     
@@ -220,7 +222,7 @@ def form_factor(radius, nm=1.333, wavelength=532):
     float: Form factor.
     """
     k = (2 * np.pi * nm) / wavelength 
-    q = 2 * k * np.sin(np.pi / 2) 
+    q = 2 * k * np.sin(theta) 
     return 3 / (q * radius)**3 * (np.sin(q * radius) - q * radius * np.cos(q * radius))
 
 def signal_iscat(form_factor, polarizability):
@@ -236,6 +238,64 @@ def signal_iscat(form_factor, polarizability):
     """
     return np.abs(form_factor) * polarizability
 
+def darkfield_intensity(radius, ri, nm=1.333, wavelength=532, theta_max=None, na=1, Eill = 1):
+    """
+    Calculate the darkfield intensity captured by the camera.
+    
+    Parameters:
+    radius (float): Radius of the particle.
+    ri (float): Refractive index of the particle.
+    nm (float): Refractive index of the medium.
+    wavelength (float): Wavelength in nanometers.
+    theta_max (float): Maximum scattering angle in radians.
+    na (float): Numerical aperture of the objective.
+    Eill (float): Illumination intensity.
+
+    Returns:
+    - IcameradA (float): Total intensity captured by the camera.
+    """
+    if theta_max is None:
+        theta_max = np.arcsin(na / nm)
+
+    polarizability = get_polarizability(radius=radius, refractive_index=ri, refractive_index_medium=nm)
+    k = 2 * np.pi * nm / wavelength
+
+    # Constant factor
+    constant_factor = 2 * np.pi * (np.abs(Eill)**2) * (k**4) * (np.abs(polarizability)**2)
+    
+    # Integrand function
+    def integrand(theta):
+        return np.cos(theta) * np.sin(theta) * (form_factor(radius=radius, theta=theta, wavelength=wavelength, nm=nm)**2)
+    
+    # Numerical integration over the polar angle from 0 to theta_max
+    integral_result, _ = quad(integrand, 0, theta_max)
+    
+    # Calculate the total intensity
+    IcameradA = constant_factor * integral_result
+    
+    return IcameradA
+
+def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=532, theta_max=None, na=1, Eill = 1):
+    """
+    Calculate the range of darkfield intensity captured by the camera.
+    
+    Parameters:
+    radius_range (np.ndarray): Array of radius values.
+    ri_range (np.ndarray): Array of refractive index values.
+    nm (float): Refractive index of the medium.
+    wavelength (float): Wavelength in nanometers.
+    theta_max (float): Maximum scattering angle in radians.
+    na (float): Numerical aperture of the objective.
+    Eill (float): Illumination intensity.
+
+    Returns:
+    tuple: Min and max values of the total intensity captured by the camera.
+    """
+    values = [darkfield_intensity(radius=r, ri=ri, nm=nm, wavelength=wavelength, theta_max=theta_max, na=na, Eill=Eill) for r in radius_range for ri in ri_range]
+
+    return min(values), max(values)
+
+
 def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
     """
     Calculates the range of polarizabilities given arrays of possible radius and refractive indeces.
@@ -248,7 +308,6 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     Returns:
     tuple: min and max values of possible values
-    
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
 
