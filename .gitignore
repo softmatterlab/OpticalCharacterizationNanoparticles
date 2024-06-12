@@ -13,7 +13,3 @@ __pycache__/
 *.so
 lightning_logs/
 
-#Ignore folder example_signal_relation
-example_signal_relation/
-
-
