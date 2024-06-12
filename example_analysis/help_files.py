@@ -3,7 +3,7 @@ import skimage
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
-def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
+def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
     """
     Plot the frame with the detected particles.
     
@@ -18,7 +18,8 @@ def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6
     """
     fig, ax = plt.subplots(figsize=figsize)
     ax.imshow(data, cmap=cmap)
-    ax.scatter(positions[:, 1], positions[:, 0], s=s, facecolors='none', edgecolors='r')
+    if positions is not None:
+        ax.scatter(positions[:, 1], positions[:, 0], s=s, facecolors='none', edgecolors='r')
     ax.set_title(title)
     ax.axis('off')
 
@@ -26,7 +27,7 @@ def plot_frame_with_detections(data, positions, s=100, title='Frame', figsize=(6
         plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
-def plot_frame_with_detections_filled(data, positions, values, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
+def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
     """
     Plot the frame with the detected particles.
     
@@ -42,7 +43,8 @@ def plot_frame_with_detections_filled(data, positions, values, s=100, title='Fra
     """
     fig, ax = plt.subplots(figsize=figsize)
     ax.imshow(data, cmap=cmap)
-    ax.scatter(positions[:, 1], positions[:, 0], s=s, c=values, facecolors='none', edgecolors='r', alpha=alpha)
+    if positions is not None and values is not None:
+        ax.scatter(positions[:, 1], positions[:, 0], s=s, c=values, facecolors='none', edgecolors='r', alpha=alpha)
     ax.set_title(title)
     ax.axis('off')
 
@@ -50,29 +52,39 @@ def plot_frame_with_detections_filled(data, positions, values, s=100, title='Fra
         plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
-def plot_labels(labels, bins = 20, figsize = (12,3), color = 'darkblue'):
+def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', color_P='magma'):
     """
-    Plot labels as histograms.
+    Plot the overlay of the ground truth and detected particles.
 
     Parameters:
-    labels (np.ndarray): Labels: (pos_x, pos_y, pos_z, radius, ri)
-    bins (int) : Number of bins in histogram.
+    GT_particles (np.ndarray): Ground truth particles.
+    P_particles (np.ndarray): Detected particles.
     figsize (tuple): Figure size.
-    color (str): Color of histograms.
+    color_GT (str): Colormap for the ground truth particles.
+    color_P (str): Colormap for the detected particles.
     """
-
+    # Create the figure
     plt.figure(figsize=figsize)
-    plt.subplot(131)
-    plt.hist(labels[:,2], bins=bins, color=color)
-    plt.title("Z-position (in pixels)")
-    plt.subplot(132)
-    plt.hist(labels[:,3]*1e9, bins=bins, color=color, range=(75, 225))
-    plt.title("Radius(nm)")
-    plt.subplot(133)
-    plt.hist(labels[:,4], bins=bins, color=color, range=(1.35, 1.62))
-    plt.title("Refractive index")
-    plt.show()
 
+    # Ground truth particles
+    plt.subplot(1, 3, 1)
+    plt.imshow(GT_particles, cmap=color_GT)
+    plt.title("Ground Truth Particles")
+    plt.axis('off')
+
+    # Detected particles
+    plt.subplot(1, 3, 2)
+    plt.imshow(P_particles, cmap=color_P)
+    plt.title("Detected Particles")
+    plt.axis('off')
+
+    # Overlay of the two images
+    plt.subplot(1, 3, 3)
+    plt.imshow(GT_particles, cmap=color_GT)
+    plt.imshow(P_particles, cmap=color_P, alpha=0.5)
+    plt.title("Overlay")
+    plt.axis('off')
+    plt.show()
 
 def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_detection_map=False):
     """
@@ -115,7 +127,7 @@ def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_det
     else:
         return detections_rvt
 
-def add_bin_circles(positions, radius, image):
+def add_bin_circles(positions, radius, image=None, shape=(512, 512)):
     """
     Add circles to an image.
     
@@ -127,6 +139,8 @@ def add_bin_circles(positions, radius, image):
     Returns:
     np.ndarray: Image with circles added.
     """
+    if image is None:
+        image = np.zeros(shape)
     im = image.copy()
     
     if len(positions) == 0:
@@ -208,7 +222,7 @@ def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     V = 4/3 * np.pi * radius**3
     return 3/2 * V * (refractive_index**2 - refractive_index_medium**2) / (2 * refractive_index_medium**2 + refractive_index**2)
 
-def form_factor(radius, theta = np.pi/2, nm=1.333, wavelength=0.532):
+def form_factor(radius, theta=np.pi/2, nm=1.333, wavelength=0.532):
     """
     Calculate the spherical form factor in nanometers.
     
