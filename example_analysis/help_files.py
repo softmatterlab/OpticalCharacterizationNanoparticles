@@ -86,6 +86,38 @@ def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', c
     plt.axis('off')
     plt.show()
 
+def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Estimated Signal strength", title="Predictions on validation set", figsize=(4, 4), linfit=False):
+    """
+    Visualize the predictions on the validation set.
+
+    Parameters:
+    labels (np.ndarray): Ground truth values.
+    predictions (np.ndarray): Predicted values.
+    xlabel (str): Label for the x-axis.
+    ylabel (str): Label for the y-axis.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    linfit (bool): If True, plot the linear fit.
+    """
+
+    plt.figure(figsize=figsize)
+    plt.scatter(labels, predictions, color="darkblue", alpha=0.6, s=50)
+    if linfit:
+        coefficients = np.polyfit(labels, predictions, 1)
+        polynomial = np.poly1d(coefficients)
+        x_axis = np.linspace(labels.min(), labels.max(), 100)
+        y_axis = polynomial(x_axis)
+        plt.plot(x_axis, y_axis, color = 'darkorange', linestyle="--", linewidth=4, label="Linear fit")
+    else:
+        plt.plot([np.min(labels), np.max(labels)], [np.min(labels), np.max(labels)], color = 'darkorange', linestyle="--", linewidth=4, label="y=x")
+    
+    plt.xlabel(xlabel, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
+    plt.legend(fontsize=12)
+    plt.title(title, fontsize=14)
+    plt.show()
+
+
 def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_detection_map=False):
     """
     Apply the Radial Variance Transform to the image and return the detections.
