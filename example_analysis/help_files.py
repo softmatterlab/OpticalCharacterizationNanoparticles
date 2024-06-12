@@ -3,121 +3,6 @@ import skimage
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
-def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
-    """
-    Plot the frame with the detected particles.
-    
-    Parameters:
-    data (np.ndarray): Input image data.
-    positions (np.ndarray): Detected particle positions.
-    s (int): Radius of the circle.
-    title (str): Title of the plot.
-    figsize (tuple): Figure size.
-    cmap (str): Colormap of the image.
-    save_path (str): Path to save the plot.
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.imshow(data, cmap=cmap)
-    if positions is not None:
-        ax.scatter(positions[:, 1], positions[:, 0], s=s, facecolors='none', edgecolors='r')
-    ax.set_title(title)
-    ax.axis('off')
-
-    if save_path:
-        plt.savefig(save_path, bbox_inches='tight')
-    plt.show()
-
-def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
-    """
-    Plot the frame with the detected particles.
-    
-    Parameters:
-    data (np.ndarray): Input image data.
-    positions (np.ndarray): Detected particle positions.
-    values (np.ndarray): Values associated to the positions.
-    s (int): Radius of the circle.
-    title (str): Title of the plot.
-    figsize (tuple): Figure size.
-    cmap (str): Colormap of the image.
-    save_path (str): Path to save the plot.
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.imshow(data, cmap=cmap)
-    if positions is not None and values is not None:
-        ax.scatter(positions[:, 1], positions[:, 0], s=s, c=values, facecolors='none', edgecolors='r', alpha=alpha)
-    ax.set_title(title)
-    ax.axis('off')
-
-    if save_path:
-        plt.savefig(save_path, bbox_inches='tight')
-    plt.show()
-
-def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', color_P='magma'):
-    """
-    Plot the overlay of the ground truth and detected particles.
-
-    Parameters:
-    GT_particles (np.ndarray): Ground truth particles.
-    P_particles (np.ndarray): Detected particles.
-    figsize (tuple): Figure size.
-    color_GT (str): Colormap for the ground truth particles.
-    color_P (str): Colormap for the detected particles.
-    """
-    # Create the figure
-    plt.figure(figsize=figsize)
-
-    # Ground truth particles
-    plt.subplot(1, 3, 1)
-    plt.imshow(GT_particles, cmap=color_GT)
-    plt.title("Ground Truth Particles")
-    plt.axis('off')
-
-    # Detected particles
-    plt.subplot(1, 3, 2)
-    plt.imshow(P_particles, cmap=color_P)
-    plt.title("Detected Particles")
-    plt.axis('off')
-
-    # Overlay of the two images
-    plt.subplot(1, 3, 3)
-    plt.imshow(GT_particles, cmap=color_GT)
-    plt.imshow(P_particles, cmap=color_P, alpha=0.5)
-    plt.title("Overlay")
-    plt.axis('off')
-    plt.show()
-
-def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Estimated Signal strength", title="Predictions on validation set", figsize=(4, 4), linfit=False):
-    """
-    Visualize the predictions on the validation set.
-
-    Parameters:
-    labels (np.ndarray): Ground truth values.
-    predictions (np.ndarray): Predicted values.
-    xlabel (str): Label for the x-axis.
-    ylabel (str): Label for the y-axis.
-    title (str): Title of the plot.
-    figsize (tuple): Figure size.
-    linfit (bool): If True, plot the linear fit.
-    """
-
-    plt.figure(figsize=figsize)
-    plt.scatter(labels, predictions, color="darkblue", alpha=0.6, s=50)
-    if linfit:
-        coefficients = np.polyfit(labels, predictions, 1)
-        polynomial = np.poly1d(coefficients)
-        x_axis = np.linspace(labels.min(), labels.max(), 100)
-        y_axis = polynomial(x_axis)
-        plt.plot(x_axis, y_axis, color = 'darkorange', linestyle="--", linewidth=4, label="Linear fit")
-    else:
-        plt.plot([np.min(labels), np.max(labels)], [np.min(labels), np.max(labels)], color = 'darkorange', linestyle="--", linewidth=4, label="y=x")
-    
-    plt.xlabel(xlabel, fontsize=12)
-    plt.ylabel(ylabel, fontsize=12)
-    plt.legend(fontsize=12)
-    plt.title(title, fontsize=14)
-    plt.show()
-
-
 def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_detection_map=False):
     """
     Apply the Radial Variance Transform to the image and return the detections.
@@ -447,6 +332,120 @@ def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     vals = [dm(r, i) * np.abs(form_factor(r*1e6, nm=nm, wavelength=w)) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
+
+def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
+    """
+    Plot the frame with the detected particles.
+    
+    Parameters:
+    data (np.ndarray): Input image data.
+    positions (np.ndarray): Detected particle positions.
+    s (int): Radius of the circle.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    cmap (str): Colormap of the image.
+    save_path (str): Path to save the plot.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.imshow(data, cmap=cmap)
+    if positions is not None:
+        ax.scatter(positions[:, 1], positions[:, 0], s=s, facecolors='none', edgecolors='r')
+    ax.set_title(title)
+    ax.axis('off')
+
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
+    """
+    Plot the frame with the detected particles.
+    
+    Parameters:
+    data (np.ndarray): Input image data.
+    positions (np.ndarray): Detected particle positions.
+    values (np.ndarray): Values associated to the positions.
+    s (int): Radius of the circle.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    cmap (str): Colormap of the image.
+    save_path (str): Path to save the plot.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.imshow(data, cmap=cmap)
+    if positions is not None and values is not None:
+        ax.scatter(positions[:, 1], positions[:, 0], s=s, c=values, facecolors='none', edgecolors='r', alpha=alpha)
+    ax.set_title(title)
+    ax.axis('off')
+
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', color_P='magma'):
+    """
+    Plot the overlay of the ground truth and detected particles.
+
+    Parameters:
+    GT_particles (np.ndarray): Ground truth particles.
+    P_particles (np.ndarray): Detected particles.
+    figsize (tuple): Figure size.
+    color_GT (str): Colormap for the ground truth particles.
+    color_P (str): Colormap for the detected particles.
+    """
+    # Create the figure
+    plt.figure(figsize=figsize)
+
+    # Ground truth particles
+    plt.subplot(1, 3, 1)
+    plt.imshow(GT_particles, cmap=color_GT)
+    plt.title("Ground Truth Particles")
+    plt.axis('off')
+
+    # Detected particles
+    plt.subplot(1, 3, 2)
+    plt.imshow(P_particles, cmap=color_P)
+    plt.title("Detected Particles")
+    plt.axis('off')
+
+    # Overlay of the two images
+    plt.subplot(1, 3, 3)
+    plt.imshow(GT_particles, cmap=color_GT)
+    plt.imshow(P_particles, cmap=color_P, alpha=0.5)
+    plt.title("Overlay")
+    plt.axis('off')
+    plt.show()
+
+def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Estimated Signal strength", title="Predictions on validation set", figsize=(4, 4), linfit=False):
+    """
+    Visualize the predictions on the validation set.
+
+    Parameters:
+    labels (np.ndarray): Ground truth values.
+    predictions (np.ndarray): Predicted values.
+    xlabel (str): Label for the x-axis.
+    ylabel (str): Label for the y-axis.
+    title (str): Title of the plot.
+    figsize (tuple): Figure size.
+    linfit (bool): If True, plot the linear fit.
+    """
+
+    plt.figure(figsize=figsize)
+    plt.scatter(labels, predictions, color="darkblue", alpha=0.6, s=50)
+    if linfit:
+        coefficients = np.polyfit(labels, predictions, 1)
+        polynomial = np.poly1d(coefficients)
+        x_axis = np.linspace(labels.min(), labels.max(), 100)
+        y_axis = polynomial(x_axis)
+        plt.plot(x_axis, y_axis, color = 'darkorange', linestyle="--", linewidth=4, label="Linear fit")
+    else:
+        plt.plot([np.min(labels), np.max(labels)], [np.min(labels), np.max(labels)], color = 'darkorange', linestyle="--", linewidth=4, label="y=x")
+    
+    plt.xlabel(xlabel, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
+    plt.legend(fontsize=12)
+    plt.title(title, fontsize=14)
+    plt.show()
 
 def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=False):
     """
