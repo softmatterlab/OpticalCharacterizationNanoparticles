@@ -3,6 +3,7 @@ sys.path.insert(0, "../") # Adds the module to path
 import deeptrack as dt
 
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 
 # Define the parameters of the optics
@@ -31,6 +32,14 @@ np.random.seed(1234)
 
 # Define the pupil function for noise in holography and ISCAT
 def crop(pupil_radius):
+    """ Crop the pupil function to a circle of radius pupil_radius.
+
+    Args:
+        pupil_radius (float): Radius of the pupil function.
+    Returns:
+        function: Function that crops the pupil function to a circle of radius pupil_radius.
+    """
+
     def inner(image):
         x = np.arange(image.shape[0]) - image.shape[0] / 2
         y = np.arange(image.shape[1]) - image.shape[1] / 2
@@ -44,6 +53,15 @@ HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1 = 0.3)
 VC = dt.VerticalComa(coefficient=lambda c2:c2, c2 = 0.3)
 
 def get_labels(image):
+    """Get the labels of the particles in the image.
+
+    Args:
+        image (deeptrack.Image): Image containing the particles.
+
+    Returns:
+        np.ndarray: Array containing the labels of the particles.
+    """
+
     array = np.zeros((N_PARTICLES, 5), dtype = np.float32)
     count = 0
     for property in image.properties:
@@ -77,8 +95,6 @@ def main():
             wavelength=WAVELENGTH,
             resolution=RESOLUTION,
             output_region=(0, 0, IMAGE_SIZE, IMAGE_SIZE),
-            #coherence_length=1e-8,
-            #offset_z = 10,
             illumination_angle=0,
         )
 
@@ -124,15 +140,14 @@ def main():
     #Gaussian and poisson noise
     if NOISE == True:
         if OPTICS_CASE == "darkfield":
-            training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_DARKFIELD)
+            training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_DARKFIELD)
         elif OPTICS_CASE == "iscat":
-            training_data = training_data >>  dt.Gaussian(sigma=lambda: np.random.rand() * NOISE_ISCAT)
-        elif OPTICS_CASE == "brightfield":
+            training_data = training_data >>  dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_ISCAT)
+        elif OPTICS_CASE == "qf":
             noise = dt.Gaussian(
                 mu=0, 
-                sigma=lambda: np.random.rand() * NOISE_QF_REAL + np.random.rand()*NOISE_QF_IMAG* 1j,
+                sigma=lambda: np.random.rand()*NOISE_QF_REAL + np.random.rand()*NOISE_QF_IMAG* 1j,
             )
-
             training_data = training_data >> noise
     
     #To get the labels
@@ -155,9 +170,16 @@ def main():
 
     #Save the data
     print("Saving data...")
-    np.save(f"../data/{OPTICS_CASE}_data.npy", frame)
-    np.save(f"../data/{OPTICS_CASE}_labels.npy", labels)
-    plt.imsave(f"../assets/{OPTICS_CASE}_frame.png", frame[...,-1], cmap = "gray")
+
+    #Paths to save the data
+    data_path = os.path.join("..", "data", f"{OPTICS_CASE}", f"{OPTICS_CASE}_data.npy")
+    labels_path = os.path.join("..", "data", f"{OPTICS_CASE}", f"{OPTICS_CASE}_labels.npy")
+    image_path = os.path.join("..", "assets", f"{OPTICS_CASE}", f"{OPTICS_CASE}_frame.png")
+
+    #Save the data
+    np.save(data_path, frame)
+    np.save(labels_path, labels)
+    plt.imsave(image_path, frame[...,-1], cmap = "gray")
 
 if __name__ == "__main__":
     main()
