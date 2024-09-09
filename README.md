@@ -6,12 +6,16 @@ By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Giovanni Volpe, 
 
 ## Description
 
-In this tutorial, we provide three notebooks focusing on particle characterization techniques: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy).
+In this tutorial, we provide three notebooks for particle characterization in the following regimes: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy).
+
+* `ISCAT_analysis´: Analyzing particles imaged in ISCAT.
+* `Quantitative_field_analysis´: Analyzing particles imaged in Quantitative Field Imaging. 
+* `Darkfield_analysis´: Analyzing particles imaged in Darkfield Microscopy.
 
 More...
 
 ## Dependencies
-To run notebook please install deeplay (https://github.com/DeepTrackAI/deeplay), (https://github.com/DeepTrackAI/deeptrack) and its following dependencies.
+To run notebook please install (https://github.com/DeepTrackAI/deeptrack) and its following dependencies.
 
 ## Usage
 ### Training-tutorials
