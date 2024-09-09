@@ -1,0 +1,16 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles
+message: >-
+  If you use this software, please cite it through this
+  publication:...
+  "Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles".
+type: software
+authors:
+  - given-names: Fredrik Skärberg
+    family-names: Skärberg
+    email: fredrik.skarberg@physics.gu.se
+    orcid: 
+- 
