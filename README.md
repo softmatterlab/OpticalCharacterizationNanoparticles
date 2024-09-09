@@ -6,9 +6,9 @@ By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Giovanni Volpe, 
 
 ## Description
 
-In this tutorial, we provide three notebooks for particle characterization in the following regimes: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy).
+In this tutorial, we provide three notebooks for particle characterization in the following regimes: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy). Se the following notebooks:
 
-* *ISCAT_analysis*: Analyzing particles imaged in ISCAT.
+* `ISCAT_analysis`: Analyzing particles imaged in ISCAT.
 * *Quantitative_field_analysis*: Analyzing particles imaged in Quantitative Field Imaging. 
 * *Darkfield_analysis*: Analyzing particles imaged in Darkfield Microscopy.
 
