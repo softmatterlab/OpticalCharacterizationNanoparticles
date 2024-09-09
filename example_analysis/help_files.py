@@ -3,6 +3,7 @@ import skimage
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
+
 def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_detection_map=False):
     """
     Apply the Radial Variance Transform to the image and return the detections.
@@ -44,6 +45,7 @@ def rvt_pipeline(data, rmin=4, rmax=25, th_scale=0.3, min_distance=7, return_det
     else:
         return detections_rvt
 
+
 def add_bin_circles(positions, radius, image=None, shape=(512, 512)):
     """
     Add circles to an image.
@@ -68,6 +70,7 @@ def add_bin_circles(positions, radius, image=None, shape=(512, 512)):
         im[rr, cc] = 1
     return im
 
+
 def get_rois(data, positions, padsize):
     """
     Retrieve ROIs from data.
@@ -91,6 +94,7 @@ def get_rois(data, positions, padsize):
     
     return np.stack(rois)
 
+
 def get_F1_score(Pred_Particles, GT_particles):
     """
     Get the F1 score between the predicted particles and the ground truth.
@@ -109,6 +113,7 @@ def get_F1_score(Pred_Particles, GT_particles):
     F1 = 2 * TP / (2 * TP + FP + FN)
     return F1
 
+
 def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.333):
     """
     Calculate the polarizability of a particle.
@@ -124,6 +129,7 @@ def get_polarizability_rr(radius, refractive_index, refractive_index_medium=1.33
     """
     return np.array(4/3 * np.pi * radius**3 * (refractive_index - refractive_index_medium))
 
+
 def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     """
     Calculate the polarizability of a particle with given medium refractive index.
@@ -138,6 +144,7 @@ def get_polarizability(radius, refractive_index, refractive_index_medium=1.333):
     """
     V = 4/3 * np.pi * radius**3
     return 3/2 * V * (refractive_index**2 - refractive_index_medium**2) / (2 * refractive_index_medium**2 + refractive_index**2)
+
 
 def form_factor(radius, theta=np.pi/2, nm=1.333, wavelength=0.532):
     """
@@ -156,6 +163,7 @@ def form_factor(radius, theta=np.pi/2, nm=1.333, wavelength=0.532):
     q = 2 * k * np.sin(theta) 
     return 3 / (q * radius)**3 * (np.sin(q * radius) - q * radius * np.cos(q * radius))
 
+
 def signal_iscat(form_factor, polarizability):
     """
     Calculate the signal in iSCAT.
@@ -168,6 +176,7 @@ def signal_iscat(form_factor, polarizability):
     float: Signal in iSCAT.
     """
     return np.abs(form_factor) * polarizability
+
 
 def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
     """
@@ -205,6 +214,7 @@ def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, 
     IcameradA = constant_factor * integral_result
     
     return IcameradA
+
 
 def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
     """
@@ -251,6 +261,7 @@ def pol_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     return min(vals), max(vals)
 
+
 def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
 
     """
@@ -275,6 +286,7 @@ def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     vals = [dm(r, i) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
+
 
 def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     """
@@ -310,6 +322,7 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
 
     return min(vals), max(vals)
 
+
 def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     """
     Calculates the mean and standard deviation of signals given arrays of possible radius and refractive indeces.
@@ -332,6 +345,7 @@ def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     vals = [dm(r, i) * np.abs(form_factor(r*1e6, nm=nm, wavelength=w)) for r in rad for i in ri]
 
     return np.mean(vals), np.std(vals)
+
 
 def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', save_path=None):
     """
@@ -357,6 +371,7 @@ def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsi
         plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
+
 def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
     """
     Plot the frame with the detected particles.
@@ -381,6 +396,7 @@ def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, 
     if save_path:
         plt.savefig(save_path, bbox_inches='tight')
     plt.show()
+
 
 def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', color_P='magma'):
     """
@@ -416,6 +432,7 @@ def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', c
     plt.axis('off')
     plt.show()
 
+
 def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Estimated Signal strength", title="Predictions on validation set", figsize=(4, 4), linfit=False):
     """
     Visualize the predictions on the validation set.
@@ -446,6 +463,7 @@ def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Es
     plt.legend(fontsize=12)
     plt.title(title, fontsize=14)
     plt.show()
+
 
 def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=False):
     """
@@ -497,6 +515,7 @@ def gaussian_fit(input_data, upscale=1, binary_gauss=False, return_integral=Fals
 
     return gaussian_values
 
+
 def radial_variance_gaussian(input_data, rmin=3, rmax=20, binary_gauss=False, return_integral=False):
     """
     Creates a score map with Radial Variance Transform and fits a 2D Gaussian to the data.
@@ -524,3 +543,4 @@ def radial_variance_gaussian(input_data, rmin=3, rmax=20, binary_gauss=False, re
         return np.abs(np.sum(input_data[..., 0] * gaussian_values))
 
     return np.sum(gaussian_values) ** (1 / 2)
+
