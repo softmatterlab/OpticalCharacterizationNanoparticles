@@ -1,4 +1,4 @@
-# Optical-label-free-microscopy-characterization-of-dielectric-nanoparticles
+# Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles
 
 By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Giovanni Volpe, Fredrik Höök and Daniel Midtvedt.
 
