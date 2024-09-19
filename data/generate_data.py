@@ -1,7 +1,4 @@
-import sys
-sys.path.insert(0, "../") # Adds the module to path
 import deeptrack as dt
-
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -12,7 +9,7 @@ NA = 1
 MAGNIFICATION = 1
 WAVELENGTH = 532e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "qf" # "qf", "darkfield", "iscat"
+OPTICS_CASE = "qf"  # "qf", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -29,6 +26,7 @@ NOISE_QF_IMAG = 3e-2
 
 # Set the seed for reproducibility
 np.random.seed(1234)
+
 
 # Define the pupil function for noise in holography and ISCAT
 def crop(pupil_radius):
@@ -48,9 +46,11 @@ def crop(pupil_radius):
         return image
     return inner
 
+
 CROP = dt.Lambda(crop, pupil_radius=lambda: 0.8*IMAGE_SIZE)
-HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1 = 0.3)
-VC = dt.VerticalComa(coefficient=lambda c2:c2, c2 = 0.3)
+HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1=0.3)
+VC = dt.VerticalComa(coefficient=lambda c2: c2, c2=0.3)
+
 
 def get_labels(image):
     """Get the labels of the particles in the image.
@@ -62,7 +62,7 @@ def get_labels(image):
         np.ndarray: Array containing the labels of the particles.
     """
 
-    array = np.zeros((N_PARTICLES, 5), dtype = np.float32)
+    array = np.zeros((N_PARTICLES, 5), dtype=np.float32)
     count = 0
     for property in image.properties:
         if "position" in property:
@@ -135,14 +135,14 @@ def main():
         )
 
     #Define the optics and particles.
-    training_data = optics(particles>>noise) 
+    training_data = optics(particles >> noise) 
 
     #Gaussian and poisson noise
     if NOISE == True:
         if OPTICS_CASE == "darkfield":
             training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_DARKFIELD)
         elif OPTICS_CASE == "iscat":
-            training_data = training_data >>  dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_ISCAT)
+            training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_ISCAT)
         elif OPTICS_CASE == "qf":
             noise = dt.Gaussian(
                 mu=0, 
@@ -160,13 +160,13 @@ def main():
     labels = get_labels(frame)
 
     if OPTICS_CASE == "qf":
-        new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype = np.float32)
+        new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype=np.float32)
         new_frame[..., 0] = np.squeeze(np.real(frame))
         new_frame[..., 1] = np.squeeze(np.imag(frame))
         frame = new_frame
 
     #Transform the data into a numpy array
-    frame = np.array(frame, dtype = np.float32)
+    frame = np.array(frame, dtype=np.float32)
 
     #Save the data
     print("Saving data...")
@@ -179,7 +179,7 @@ def main():
     #Save the data
     np.save(data_path, frame)
     np.save(labels_path, labels)
-    plt.imsave(image_path, frame[...,-1], cmap = "gray")
+    plt.imsave(image_path, frame[..., -1], cmap="gray")
 
 if __name__ == "__main__":
     main()

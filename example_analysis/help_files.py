@@ -1,3 +1,29 @@
+"""
+Helper functions for the analysis of the different tasks in the example notebooks.
+
+Functions:
+- rvt_pipeline: Apply the Radial Variance Transform to the image and return the detections.
+- add_bin_circles: Add circles to an image.
+- get_rois: Retrieve ROIs from data.
+- get_F1_score: Get the F1 score between the predicted particles and the ground truth.
+- get_polarizability_rr: Calculate the polarizability of a particle.
+- get_polarizability: Calculate the polarizability of a particle with given medium refractive index.
+- form_factor: Calculate the spherical form factor in nanometers.
+- signal_iscat: Calculate the signal in iSCAT.
+- darkfield_intensity: Calculate the darkfield intensity captured by the camera.
+- darkfield_intensity_range: Calculate the range of darkfield intensity captured by the camera.
+- pol_range: Calculates the range of polarizabilities given arrays of possible radius and refractive indeces.
+- pol_range_mean_std: Calculates the mean and standard deviation of polarizabilities given arrays of possible radius and refractive indeces.
+- signal_range: Calculates the range of signals given arrays of possible radius and refractive indeces.
+- signal_range_mean_std: Calculates the mean and standard deviation of signals given arrays of possible radius and refractive indeces.
+- plot_frame_with_detections: Plot the frame with the detected particles.
+- plot_frame_with_detections_filled: Plot the frame with the detected particles.
+- plot_overlay: Plot the overlay of the ground truth and detected particles.
+- visualize_lab_pred: Visualize the predictions on the validation set.
+- gaussian_fit: Fit a 2D Gaussian to the input data and return the Gaussian values.
+- radial_variance_gaussian: Creates a score map with Radial Variance Transform and fits a 2D Gaussian to the data.
+"""
+
 import numpy as np
 import skimage
 from scipy.integrate import quad
@@ -160,7 +186,7 @@ def form_factor(radius, theta=np.pi/2, nm=1.333, wavelength=0.532):
     float: Form factor.
     """
     k = (2 * np.pi * nm) / wavelength 
-    q = 2 * k * np.sin(theta) 
+    q = 2 * k * np.sin(theta/2) 
     return 3 / (q * radius)**3 * (np.sin(q * radius) - q * radius * np.cos(q * radius))
 
 
@@ -178,7 +204,7 @@ def signal_iscat(form_factor, polarizability):
     return np.abs(form_factor) * polarizability
 
 
-def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
+def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill=1, illumination_angle=0):
     """
     Calculate the darkfield intensity captured by the camera.
     
@@ -190,6 +216,7 @@ def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, 
     theta_max (float): Maximum scattering angle in radians.
     na (float): Numerical aperture of the objective.
     Eill (float): Illumination intensity.
+    illumination_angle (float): Illumination angle in radians.
 
     Returns:
     - IcameradA (float): Total intensity captured by the camera.
@@ -205,7 +232,8 @@ def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, 
     
     # Integrand function
     def integrand(theta):
-        return np.cos(theta) * np.sin(theta) * (form_factor(radius=radius, theta=theta, wavelength=wavelength, nm=nm)**2)
+        theta_ = theta - illumination_angle
+        return np.cos(theta_) * np.sin(theta_) * (form_factor(radius=radius, theta=theta_, nm=nm, wavelength=wavelength)**2)
     
     # Numerical integration over the polar angle from 0 to theta_max
     integral_result, _ = quad(integrand, 0, theta_max)
@@ -216,7 +244,7 @@ def darkfield_intensity(radius, ri, nm=1.333, wavelength=0.532, theta_max=None, 
     return IcameradA
 
 
-def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill = 1):
+def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=0.532, theta_max=None, na=1, Eill=1, illumination_angle=0):
     """
     Calculate the range of darkfield intensity captured by the camera.
     
@@ -228,11 +256,12 @@ def darkfield_intensity_range(radius_range, ri_range, nm=1.333, wavelength=0.532
     theta_max (float): Maximum scattering angle in radians.
     na (float): Numerical aperture of the objective.
     Eill (float): Illumination intensity.
+    illumination_angle (float): Illumination angle in radians.
 
     Returns:
     tuple: Min and max values of the total intensity captured by the camera.
     """
-    values = [darkfield_intensity(radius=r*1e6, ri=ri, nm=nm, wavelength=wavelength, theta_max=theta_max, na=na, Eill=Eill) for r in radius_range for ri in ri_range]
+    values = [darkfield_intensity(radius=r*1e6, ri=ri, nm=nm, wavelength=wavelength, theta_max=theta_max, na=na, Eill=Eill, illumination_angle=illumination_angle) for r in radius_range for ri in ri_range]
 
     return min(values), max(values)
 
@@ -288,7 +317,7 @@ def pol_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     return np.mean(vals), np.std(vals)
 
 
-def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
+def signal_range_iscat(rad_range, ri_range, w=0.532, nm=1.33, theta=np.pi):
     """
     Calculates the range of signals given arrays of possible radius and refractive indeces.
 
@@ -304,7 +333,7 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     """
     dm = lambda rad, ri: get_polarizability(rad*1e6, ri, nm)
 
-    form_f = lambda rad: form_factor(rad*1e6, nm=nm, wavelength=w)
+    form_f = lambda rad: form_factor(rad*1e6, theta=theta, nm=nm, wavelength=w)
 
     vals = [
         dm(rad_range[0], ri_range[0]) * np.abs(form_f(rad_range[0])),
@@ -323,7 +352,7 @@ def signal_range(rad_range, ri_range, w=0.532, nm=1.33):
     return min(vals), max(vals)
 
 
-def signal_range_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
+def signal_range__iscat_mean_std(rad_range, ri_range, w=0.532, nm=1.33):
     """
     Calculates the mean and standard deviation of signals given arrays of possible radius and refractive indeces.
 
@@ -372,7 +401,7 @@ def plot_frame_with_detections(data, positions=None, s=100, title='Frame', figsi
     plt.show()
 
 
-def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha = 0.75, save_path=None):
+def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, title='Frame', figsize=(6, 6), cmap='gray', alpha=0.75, save_path=None):
     """
     Plot the frame with the detected particles.
     
@@ -398,7 +427,7 @@ def plot_frame_with_detections_filled(data, positions=None, values=None, s=100, 
     plt.show()
 
 
-def plot_overlay(GT_particles, P_particles, figsize=(9,4), color_GT='cividis', color_P='magma'):
+def plot_overlay(GT_particles, P_particles, figsize=(9, 4), color_GT='cividis', color_P='magma'):
     """
     Plot the overlay of the ground truth and detected particles.
 
@@ -454,9 +483,9 @@ def visualize_lab_pred(labels, predictions, xlabel="Signal strength", ylabel="Es
         polynomial = np.poly1d(coefficients)
         x_axis = np.linspace(labels.min(), labels.max(), 100)
         y_axis = polynomial(x_axis)
-        plt.plot(x_axis, y_axis, color = 'darkorange', linestyle="--", linewidth=4, label="Linear fit")
+        plt.plot(x_axis, y_axis, color='darkorange', linestyle="--", linewidth=4, label="Linear fit")
     else:
-        plt.plot([np.min(labels), np.max(labels)], [np.min(labels), np.max(labels)], color = 'darkorange', linestyle="--", linewidth=4, label="y=x")
+        plt.plot([np.min(labels), np.max(labels)], [np.min(labels), np.max(labels)], color='darkorange', linestyle="--", linewidth=4, label="y=x")
     
     plt.xlabel(xlabel, fontsize=12)
     plt.ylabel(ylabel, fontsize=12)
