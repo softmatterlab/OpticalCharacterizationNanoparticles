@@ -23,4 +23,12 @@ The notebook contains the following sections:
 </p>
 
 
-# How to apply to your own data:
+## How to apply to your own data:
+
+Down below is a description of how to modify the notebook for use of your own data.
+
+1. Collect data and transform/save it into `numpy` arrays, that is, a file ending with `.npy`. Additional tip is to crop the frame so that it is a factor of 2 (application to the LodeSTAR detection model requires it to be downsampled 2 times)
+
+2. For training a LodeSTAR detection model it is needed to use a minimum of one crop around a particle. It is adviced to choose a particle that is clearly visable and seperable from other particles, and that is descriptive of the ones that the model aims to detect. A good size for the ROI(Region Of Interest) is 32x32, 48x48 or 64x64. If the model fails, or the detection result is not sufficient enough: try to choose more particles in the training and/or change the thresholding/augmentations slightly. The settings in the notebook are a suitable starting point, but may need some finetuning to your own data.
+
+3. For training a Convolutional Neural Network(CNN) for predicting the signal of particles it is adviced to start with the neural network architecture provided in the notebook. The only modifications needed is to change the simulation of the training data so that it fits your experimental setup. That is, to change parameters such as `wavelength`, `resolution`, `Numerical Aperature` of the optical system, and which range of `radius` and `refractive index` fits your data.
