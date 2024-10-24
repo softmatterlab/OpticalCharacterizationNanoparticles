@@ -8,7 +8,7 @@ You can find the full paper on arXiv: [Optical Label-Free Microscopy Characteriz
 
 In this tutorial we provide three notebooks for particle characterization in the following regimes: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy). See the following notebooks:
 
-* `ISCAT_analysis`: Analyzing particles imaged in ISCAT.
+* [ISCAT_analysis](iscat/ISCAT_analysis.ipynb): Analyzing particles imaged in ISCAT.
 * `Quantitative_field_analysis`: Analyzing particles imaged in Quantitative Field Imaging. 
 * `Darkfield_analysis`: Analyzing particles imaged in Darkfield Microscopy.
 
@@ -29,11 +29,8 @@ Load your custom experimental frame into the project.
 Retrain the models using parameters that suit your specific experimental setup.
 This flexible approach allows for easy adaptation of the existing code to your unique dataset and requirements.
 
-### Usage examples
-
-
 ## Citation
-If you use this code for your research, please cite our paper:
+If you use this code for your research, please cite our paper: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles](https://arxiv.org/abs/2409.11810)
 
 
 
