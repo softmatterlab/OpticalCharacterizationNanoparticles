@@ -14,3 +14,10 @@ The notebook contains the following sections:
 4. Combining detection and quantification in ISCAT
     - Here we provide a short example on how to analyze an entire frame by performing tracking with LodeSTAR and signal quantification with a CNN.
 
+
+## Simulated data in the ISCAT regime:
+<img src="assets/iscat_frame.png" alt="ISCAT frame" width="400"/>
+
+<img src="assets/iscat_rois.png" alt="ISCAT frame" width="400"/>
+
+# How to apply to your own data:
