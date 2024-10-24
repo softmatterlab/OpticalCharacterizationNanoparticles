@@ -6,32 +6,61 @@ You can find the full paper on arXiv: [Optical Label-Free Microscopy Characteriz
 
 ## Description
 
-In this tutorial we provide three notebooks for particle characterization in the following regimes: Quantitative Field Imaging, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy). See the following notebooks:
+In this tutorial we provide three notebooks for particle characterization in the following regimes: Holography, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy). See the following notebooks:
 
-* [ISCAT_analysis](iscat/ISCAT_analysis.ipynb): Analyzing particles imaged in ISCAT.
-* `Quantitative_field_analysis`: Analyzing particles imaged in Quantitative Field Imaging. 
-* `Darkfield_analysis`: Analyzing particles imaged in Darkfield Microscopy.
+* [ISCAT_analysis](iscat/ISCAT_analysis.ipynb) : Analyzing particles imaged in ISCAT.
+* [Holography_analysis](holography/Holography_analysis.ipynb) : Analyzing particles imaged in Holography. 
+* [Darkfield_analysis](darkfield/Darkfield_analysis.ipynb) : Analyzing particles imaged in Darkfield Microscopy.
 
 
 ## Dependencies
 
-To run notebook please install (https://github.com/DeepTrackAI/deeptrack) and its following dependencies.
+To run the notebooks please install (https://github.com/DeepTrackAI/deeplay) and (https://github.com/DeepTrackAI/deeptrack) and its following dependencies.
+
+### Installation
+
+You can install Deeplay using pip:
+```bash
+pip install deeplay
+```
+or
+```bash
+python -m pip install deeplay
+```
+
+This will automatically install the required dependencies, including PyTorch and PyTorch Lightning. If a specific version of PyTorch is desired, it can be installed separately.
+
+and Deeptrack using pip
+
+```bash
+pip install deeptrack
+```
+or
+```bash
+python -m pip install deeptrack
+```
 
 
 ## Usage
 
-The notebooks provided are fully ready to use and will run without any modification. Each modality comes with an "experimental" frame located in the data folder, which is meant to give users a basic idea of how to work with their own data and perform analysis.
+The notebooks provided are fully ready to use and will run without any modification. Each modality comes with an "experimental" frame with corresponding labels (x, y, z, radius, refractive index), which is meant to give users a basic idea of how to work with their own data and perform analysis. 
 
-Using Your Own Data
+**Using Your Own Data**
 To use this code with your own data:
 
-Load your custom experimental frame into the project.
-Retrain the models using parameters that suit your specific experimental setup.
-This flexible approach allows for easy adaptation of the existing code to your unique dataset and requirements.
+1. Load your custom experimental frame into the project.
+2. Retrain the models using parameters that suit your specific experimental setup.
+
+This flexible approach allows for easy adaptation of the existing code to your unique dataset and requirements. More details on how to use your own data can be found in the README-files for each corresponding modality.
+
+README-files:
+* [ISCAT](iscat/README.md)
+* [Holography](holography/README.md)
+* [Darkfield](darkfield/README.md)
+
 
 ## Citation
 If you use this code for your research, please cite our paper: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles](https://arxiv.org/abs/2409.11810)
-
 
 
 ## Funding

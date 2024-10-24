@@ -9,7 +9,7 @@ NA = 1
 MAGNIFICATION = 1
 WAVELENGTH = 532e-9
 RESOLUTION = 1.14e-7
-OPTICS_CASE = "qf"  # "qf", "darkfield", "iscat"
+OPTICS_CASE = "holography"  # "holography", "darkfield", "iscat"
 
 # Define the parameters of the particles
 RADIUS_RANGE = (100e-9, 200e-9)
@@ -77,7 +77,7 @@ def get_labels(image):
 
 def main():
 
-    if OPTICS_CASE == "qf":
+    if OPTICS_CASE == "holography":
         optics = dt.Brightfield(
             NA=NA,
             magnification=MAGNIFICATION,
@@ -118,7 +118,7 @@ def main():
         L=100) ^ N_PARTICLES
     
     #Define small noise for the particles inside optics
-    if OPTICS_CASE == "qf":
+    if OPTICS_CASE == "holography":
         noise = dt.Gaussian(
             mu=0, 
             sigma=lambda: 1e-3*np.random.rand() + 1e-3*np.random.rand()*1j,
@@ -143,7 +143,7 @@ def main():
             training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_DARKFIELD)
         elif OPTICS_CASE == "iscat":
             training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_ISCAT)
-        elif OPTICS_CASE == "qf":
+        elif OPTICS_CASE == "holography":
             noise = dt.Gaussian(
                 mu=0, 
                 sigma=lambda: np.random.rand()*NOISE_QF_REAL + np.random.rand()*NOISE_QF_IMAG* 1j,
@@ -159,7 +159,7 @@ def main():
     #Get the labels
     labels = get_labels(frame)
 
-    if OPTICS_CASE == "qf":
+    if OPTICS_CASE == "holography":
         new_frame = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 2), dtype=np.float32)
         new_frame[..., 0] = np.squeeze(np.real(frame))
         new_frame[..., 1] = np.squeeze(np.imag(frame))
@@ -172,9 +172,9 @@ def main():
     print("Saving data...")
 
     #Paths to save the data
-    data_path = os.path.join("..", "data", f"{OPTICS_CASE}", f"{OPTICS_CASE}_data.npy")
-    labels_path = os.path.join("..", "data", f"{OPTICS_CASE}", f"{OPTICS_CASE}_labels.npy")
-    image_path = os.path.join("..", "assets", f"{OPTICS_CASE}", f"{OPTICS_CASE}_frame.png")
+    data_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_data.npy")
+    labels_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_labels.npy")
+    image_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_frame.png")
 
     #Save the data
     np.save(data_path, frame)
