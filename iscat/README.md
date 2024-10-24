@@ -16,8 +16,11 @@ The notebook contains the following sections:
 
 
 ## Simulated data in the ISCAT regime:
-<img src="assets/iscat_frame.png" alt="ISCAT frame" width="400"/>
 
-<img src="assets/iscat_rois.png" alt="ISCAT frame" width="400"/>
+<p float="left">
+  <img src="assets/iscat_frame.png" alt="ISCAT frame" width="400" />
+  <img src="assets/iscat_rois.png" alt="ISCAT ROIs" width="400"/>
+</p>
+
 
 # How to apply to your own data:
