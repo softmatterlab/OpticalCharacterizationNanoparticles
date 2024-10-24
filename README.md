@@ -46,6 +46,7 @@ python -m pip install deeptrack
 The notebooks provided are fully ready to use and will run without any modification. Each modality comes with an "experimental" frame with corresponding labels (x, y, z, radius, refractive index), which is meant to give users a basic idea of how to work with their own data and perform analysis. 
 
 **Using Your Own Data**
+
 To use this code with your own data:
 
 1. Load your custom experimental frame into the project.
