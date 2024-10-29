@@ -12,6 +12,8 @@ In this tutorial we provide three notebooks for particle characterization in the
 * [Holography_analysis](holography/Holography_analysis.ipynb) : Analyzing particles imaged in Holography. 
 * [Darkfield_analysis](darkfield/Darkfield_analysis.ipynb) : Analyzing particles imaged in Darkfield Microscopy.
 
+Additionally, there is a folder called `utilities` containing the python files `rvt.py`, `helpers.py` and `generate_data.py`. For more information about these files see: [README](utilities/README.md)
+
 
 ## Dependencies
 
