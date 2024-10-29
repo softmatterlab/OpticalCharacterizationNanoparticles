@@ -34,8 +34,6 @@ import scipy.ndimage
 import scipy.fftpack
 
 
-
-
 def gen_r_kernel(r, rmax):
     """Generate a ring kernel with radius `r` and size ``2*rmax+1``"""
     a=rmax*2+1

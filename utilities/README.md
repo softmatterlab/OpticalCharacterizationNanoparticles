@@ -4,7 +4,7 @@
 
 * `helpers.py` - Script containing all helper functions for the notebooks.
 
-* `rvt.py` - Script for
+* `rvt.py` - Script for Efficient Python implementation of Radial Variance Transform. 
 
 
 ## Generating a experimental frame and labels for the three different microscopy techniques (`generate_data.py`)
@@ -49,3 +49,16 @@ The main function is :func:`rvt` in the bottom of the file, which applies the tr
 Compared to the vanilla convolution implementation, there are two speed-ups:
 1) Pre-calculating and caching kernel FFT; this way so only one inverse FFT is calculated per convolution + one direct fft of the image is used for all convolutions
 2) When finding MoV, calculate ``np.mean(rsqmeans)`` in a single convolution by averaging all kernels first
+
+### Functions
+
+- **`gen_r_kernel`**: Generate a ring kernel with radius `r` and size ``2*rmax+1``
+- **`generate_all_kernels`**: Generate a set of kernels with radii between `rmin` and `rmax` and sizes ``2*rmax+1``
+- **`_check_core_args`**: Check validity of the core algorithm arguments
+- **`_check_args`**: Check validity of all the algorithm arguments
+- **`get_fshape`**: Get the required shape of the transformed image given the shape of the original image and the kernel
+- **`prepare_fft`**: Prepare the image for a convolution by taking its Fourier transform, applying padding if necessary
+- **`convolve_fft`**: Calculate the convolution from the Fourier transforms of the original image and the kernel, trimming the result if necessary
+- **`rvt_core`**: Perform core part of Radial Variance Transform (RVT) of an image
+- **`high_pass`**: Perform Gaussian high-pass filter on the image
+- **`rvt`**: Perform Radial Variance Transform (RVT) of an image 
