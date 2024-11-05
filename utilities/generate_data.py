@@ -109,7 +109,7 @@ def main():
             pupil=HC >> VC >> CROP
         )
 
-    #Define the particles
+    # Define the particles
     particles = dt.MieSphere(
         radius=lambda: np.random.uniform(*RADIUS_RANGE),
         refractive_index=lambda: np.random.uniform(*REFRACTIVE_INDEX),
@@ -117,46 +117,50 @@ def main():
         z=lambda: np.random.uniform(*Z_RANGE),
         L=100) ^ N_PARTICLES
     
-    #Define small noise for the particles inside optics
+    # Define small noise for the particles inside optics
     if OPTICS_CASE == "holography":
         noise = dt.Gaussian(
-            mu=0, 
+            mu=0,
             sigma=lambda: 1e-3*np.random.rand() + 1e-3*np.random.rand()*1j,
         )
     elif OPTICS_CASE == "iscat":
         noise = dt.Gaussian(
-            mu=0, 
+            mu=0,
             sigma=lambda: 1e-3*np.random.rand(),
             )
     else:
         noise = dt.Gaussian(
-            mu=0, 
+            mu=0,
             sigma=lambda: 1e-3*np.random.rand(),
         )
 
-    #Define the optics and particles.
+    # Define the optics and particles.
     training_data = optics(particles >> noise) 
 
-    #Gaussian and poisson noise
+    # Gaussian and poisson noise
     if NOISE == True:
         if OPTICS_CASE == "darkfield":
-            training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_DARKFIELD)
+            training_data = training_data >> dt.Gaussian(
+                sigma=lambda: np.random.rand() * NOISE_DARKFIELD
+                )
         elif OPTICS_CASE == "iscat":
-            training_data = training_data >> dt.Gaussian(sigma=lambda: np.random.rand()*NOISE_ISCAT)
+            training_data = training_data >> dt.Gaussian(
+                sigma=lambda: np.random.rand() * NOISE_ISCAT
+                )
         elif OPTICS_CASE == "holography":
             noise = dt.Gaussian(
-                mu=0, 
-                sigma=lambda: np.random.rand()*NOISE_QF_REAL + np.random.rand()*NOISE_QF_IMAG* 1j,
+                mu=0,
+                sigma=lambda: np.random.rand() * NOISE_QF_REAL + np.random.rand() * NOISE_QF_IMAG * 1j,
             )
             training_data = training_data >> noise
-    
-    #To get the labels
+
+    # To get the labels
     training_data.store_properties()
 
-    #Generate the data
+    # Generate the data
     frame = training_data.update().resolve()
 
-    #Get the labels
+    # Get the labels
     labels = get_labels(frame)
 
     if OPTICS_CASE == "holography":
@@ -165,21 +169,28 @@ def main():
         new_frame[..., 1] = np.squeeze(np.imag(frame))
         frame = new_frame
 
-    #Transform the data into a numpy array
+    # Transform the data into a numpy array
     frame = np.array(frame, dtype=np.float32)
 
-    #Save the data
+    # Save the data
     print("Saving data...")
 
-    #Paths to save the data
-    data_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_data.npy")
-    labels_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_labels.npy")
-    image_path = os.path.join("..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_frame.png")
+    # Paths to save the data
+    data_path = os.path.join(
+        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_data.npy"
+        )
+    labels_path = os.path.join(
+        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_labels.npy"
+        )
+    image_path = os.path.join(
+        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_frame.png"
+        )
 
-    #Save the data
+    # Save the data
     np.save(data_path, frame)
     np.save(labels_path, labels)
     plt.imsave(image_path, frame[..., -1], cmap="gray")
+
 
 if __name__ == "__main__":
     main()
