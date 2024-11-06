@@ -9,7 +9,7 @@ You can find the full paper on arXiv: [Optical Label-Free Microscopy Characteriz
 In this tutorial we provide three notebooks for particle characterization in the following regimes: Holographic microscopy, Darkfield Microscopy, and ISCAT(Interferometric Scattering Microscopy). See the following notebooks:
 
 * [ISCAT_analysis](iscat/ISCAT_analysis.ipynb) : Analyzing particles imaged in ISCAT.
-* [Holography_analysis](holography/Holography_analysis.ipynb) : Analyzing particles imaged in Holographic microscopy. 
+* [Holography_analysis](holography/Holography_analysis.ipynb) : Analyzing particles imaged in Holographic Microscopy. 
 * [Darkfield_analysis](darkfield/Darkfield_analysis.ipynb) : Analyzing particles imaged in Darkfield Microscopy.
 
 Additionally, there is a folder called `utilities` containing the python files `rvt.py`, `helpers.py` and `generate_data.py`. For more information about these files see: [README](utilities/README.md)
