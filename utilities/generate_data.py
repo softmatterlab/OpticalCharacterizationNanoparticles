@@ -24,6 +24,9 @@ NOISE_ISCAT = 1e-3
 NOISE_QF_REAL = 3e-2
 NOISE_QF_IMAG = 3e-2
 
+# Save or not the data
+SAVE = False
+
 # Set the seed for reproducibility
 np.random.seed(1234)
 
@@ -35,7 +38,8 @@ def crop(pupil_radius):
     Args:
         pupil_radius (float): Radius of the pupil function.
     Returns:
-        function: Function that crops the pupil function to a circle of radius pupil_radius.
+        function: Function that crops the pupil function to
+        a circle of radius pupil_radius.
     """
 
     def inner(image):
@@ -48,6 +52,8 @@ def crop(pupil_radius):
 
 
 CROP = dt.Lambda(crop, pupil_radius=lambda: 0.8*IMAGE_SIZE)
+
+# Define the coma abberation
 HC = dt.HorizontalComa(coefficient=lambda c1: c1, c1=0.3)
 VC = dt.VerticalComa(coefficient=lambda c2: c2, c2=0.3)
 
@@ -77,6 +83,8 @@ def get_labels(image):
 
 def main():
 
+    print(f"Generating {OPTICS_CASE} data...")
+    # Define the optics
     if OPTICS_CASE == "holography":
         optics = dt.Brightfield(
             NA=NA,
@@ -116,7 +124,6 @@ def main():
         position=lambda: np.random.uniform(20, IMAGE_SIZE-20, 2),
         z=lambda: np.random.uniform(*Z_RANGE),
         L=100) ^ N_PARTICLES
-    
     # Define small noise for the particles inside optics
     if OPTICS_CASE == "holography":
         noise = dt.Gaussian(
@@ -135,10 +142,10 @@ def main():
         )
 
     # Define the optics and particles.
-    training_data = optics(particles >> noise) 
+    training_data = optics(particles >> noise)
 
     # Gaussian and poisson noise
-    if NOISE == True:
+    if NOISE:
         if OPTICS_CASE == "darkfield":
             training_data = training_data >> dt.Gaussian(
                 sigma=lambda: np.random.rand() * NOISE_DARKFIELD
@@ -150,7 +157,8 @@ def main():
         elif OPTICS_CASE == "holography":
             noise = dt.Gaussian(
                 mu=0,
-                sigma=lambda: np.random.rand() * NOISE_QF_REAL + np.random.rand() * NOISE_QF_IMAG * 1j,
+                sigma=lambda: np.random.rand() * NOISE_QF_REAL +
+                np.random.rand() * NOISE_QF_IMAG * 1j,
             )
             training_data = training_data >> noise
 
@@ -172,24 +180,25 @@ def main():
     # Transform the data into a numpy array
     frame = np.array(frame, dtype=np.float32)
 
-    # Save the data
-    print("Saving data...")
+    if SAVE:
+        # Save the data
+        print("Saving data...")
 
-    # Paths to save the data
-    data_path = os.path.join(
-        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_data.npy"
-        )
-    labels_path = os.path.join(
-        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_labels.npy"
-        )
-    image_path = os.path.join(
-        "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_frame.png"
-        )
+        # Paths to save the data
+        data_path = os.path.join(
+            "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_data.npy"
+            )
+        labels_path = os.path.join(
+            "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_labels.npy"
+            )
+        image_path = os.path.join(
+            "..", f"{OPTICS_CASE}", "data", f"{OPTICS_CASE}_frame.png"
+            )
 
-    # Save the data
-    np.save(data_path, frame)
-    np.save(labels_path, labels)
-    plt.imsave(image_path, frame[..., -1], cmap="gray")
+        # Save the data
+        np.save(data_path, frame)
+        np.save(labels_path, labels)
+        plt.imsave(image_path, frame[..., -1], cmap="gray")
 
 
 if __name__ == "__main__":
