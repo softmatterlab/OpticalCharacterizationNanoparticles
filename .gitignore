@@ -1,10 +1,12 @@
 # OS generated files #
-######################
 .DS_Store
 .DS_Store?
 
 # Other files #
 .vscode
+
+# citation.cff
+CITATION.cff
 
 # cache files
 .ipynb_checkpoints/
