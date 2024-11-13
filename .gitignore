@@ -6,7 +6,7 @@
 .vscode
 
 # citation.cff
-CITATION.cff
+*.cff
 
 # cache files
 .ipynb_checkpoints/
