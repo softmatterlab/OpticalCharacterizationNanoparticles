@@ -1,7 +1,7 @@
 # Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles
 
 By Berenice García Rodríguez, Erik Olsén, Fredrik Skärberg, Giovanni Volpe, Fredrik Höök and Daniel Midtvedt.
-You can find the full paper published in Nanoscale at: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles]([https://pubs.rsc.org/en/Content/ArticleLanding/2025/NR/D4NR03860F])
+You can find the full paper published in Nanoscale at: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles](https://pubs.rsc.org/en/Content/ArticleLanding/2025/NR/D4NR03860F)
 
 
 ## Description
@@ -63,7 +63,7 @@ README-files:
 
 
 ## Citation
-If you use this code for your research, please cite our paper: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles](https://arxiv.org/abs/2409.11810)
+If you use this code for your research, please cite our paper: [Optical Label-Free Microscopy Characterization of Dielectric Nanoparticles](https://pubs.rsc.org/en/Content/ArticleLanding/2025/NR/D4NR03860F)
 
 
 ## Funding
